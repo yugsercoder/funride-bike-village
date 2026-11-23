@@ -9,7 +9,7 @@ The village sits on the lawn between **Roxas Boulevard** (north) and **Independe
 ## Guided tour (in rider order)
 
 1. **Entrance & BYD Test Drive** (Independence Road). Guests walk in through the Entrance at the southeast corner. BYD Test Drive Registration is right outside the gate. The BYD Garage and BYD Test Drive sit along Independence Road toward South Drive.
-2. **Operations column.** Right inside the gate, a single column holds the services: EMS, Command, Info / Lost & Found, Kit Claiming, two Registration desks and the Baggage Area. A barrier runs along its west side.
+2. **Operations column.** Right inside the gate, a single column holds the services: EMS, Command, Info / Lost & Found, Kit Claiming, two Registration desks and the Baggage Area. A barricade runs along its west side, with a ~3 m opening between the two Registration desks: that is the Registration entrance, and a red flow lane runs through it.
 3. **Bike Rack.** The long bike rack runs along the east fence. Park here before you explore the booths.
 4. **Bikes and Coffee & Photowall.** Bikes and Coffee is in the northeast corner. Along the top of the queue lanes are the three photowalls: 21 KM, 10 KM and 5 KM.
 5. **Sponsor blocks, north.** The red rider-flow lanes split the floor into blocks. The north blocks hold the DOT Booth, Dr. O, Oxecure, Neutra K and Wert PH.
@@ -27,9 +27,23 @@ The village sits on the lawn between **Roxas Boulevard** (north) and **Independe
 
 ---
 
+## Layout updates
+
+Newest first. Add a line here whenever the layout, the 3D sim or the PDF changes.
+
+| Date | Change |
+|---|---|
+| 2026-11-24 | Ops barricade opened (~3 m) between the two Registration desks; the red flow lane runs straight through it as the Registration entrance. |
+| 2026-11-24 | Red dashed "Bike Village" box removed from the Site Overview. |
+| 2026-11-24 | PDF/PNG reduced to one **Site Overview** page, now with booth names and sizes. The detailed booth page and size schedule were dropped. |
+| 2026-11-24 | BYD Test Drive shortened so it stays on Independence Road and stops at the South Drive corner. |
+| 2026-11-24 | AC Health / AC Mobility and BYD Showroom split into two separate 24.5 × 32 ft big booths with a walkway between them (was one 32 × 49 ft booth). |
+
+---
+
 ## Booth sizes
 
-Booths in the 3D model and in `FunRide Bike Village - Layout Plan.pdf` are drawn at these sizes (10 map px = 1 m). Regenerate the PDF after any change with `node tools/build-layout-plan.js`.
+Booths in the 3D model and in `FunRide Bike Village - Layout Plan.pdf` are drawn at these sizes (10 map px = 1 m). The PDF is a single **Site Overview** page (whole site, booth names and sizes, red flow lanes). Regenerate the PDF and PNG after any change with `node tools/build-layout-plan.js`.
 
 | Type | Booths | Size (ft) |
 |---|---|---|
