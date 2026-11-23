@@ -471,19 +471,22 @@ polyWall([[375,1022],[628,1055]], .9, .14, fenceMat);           // barrier by th
   bushes.forEach((p, i) => { o.position.set(p.x, .75, p.z); o.rotation.set(Math.random() * 3, Math.random() * 3, 0); o.scale.setScalar(.85 + Math.random() * .3); o.updateMatrix(); im.setMatrixAt(i, o.matrix); });
   im.castShadow = im.receiveShadow = true; scene.add(im);
 }
-// barrier beside the ops column (posts)
+// barrier beside the ops column (posts), with an opening at y 587 where the red lane
+// passes between the two Registration booths
+const BARRIER_GAP = [575, 599];
 {
-  const geo = new THREE.CylinderGeometry(.07, .07, .8, 6), n = 42;
-  const im = new THREE.InstancedMesh(geo, fenceMat, n), o = new THREE.Object3D();
-  for (let i = 0; i < n; i++){ o.position.set(X(868), .4, Z(455 + i * 10)); o.updateMatrix(); im.setMatrixAt(i, o.matrix); }
+  const ys = []; for (let y = 455; y <= 865; y += 10) if (y <= BARRIER_GAP[0] || y >= BARRIER_GAP[1]) ys.push(y);
+  const geo = new THREE.CylinderGeometry(.07, .07, .8, 6);
+  const im = new THREE.InstancedMesh(geo, fenceMat, ys.length), o = new THREE.Object3D();
+  ys.forEach((y, i) => { o.position.set(X(868), .4, Z(y)); o.updateMatrix(); im.setMatrixAt(i, o.matrix); });
   im.castShadow = true; scene.add(im);
 }
 // rider flow (red dotted queue lanes)
 const flowMat = new THREE.MeshBasicMaterial({color:col('#d3202f')});
 const FLOW = [
   [[684,300],[684,443]],
-  // the y 587 lane stops at the ops barrier (x 868) so it doesn't block the Registration booths
-  [[868,587],[572,587],[572,443],[945,443],[945,587]],
+  // the y 587 lane passes through the barrier opening into the gap between the two Registration booths
+  [[572,443],[945,443],[945,587],[572,587],[572,443]],
   [[688,443],[688,765]], [[793,443],[793,587]],
   [[572,587],[572,765],[800,765]], [[798,587],[798,682]], [[695,682],[800,682],[800,742],[858,742],[858,830],[645,830],[645,870]],
   [[945,587],[945,795],[1000,795],[1000,850]]

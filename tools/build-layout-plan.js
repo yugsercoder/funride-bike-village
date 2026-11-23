@@ -90,12 +90,13 @@ function base(detail) {
   // hedge (south edge)
   [[[550,812],[599,863]], [[645,905],[985,905]], [[1065,790],[1032,859]]]
     .forEach(p => s.push(`<polyline points="${pts(p)}" fill="none" stroke="#4f9a3a" stroke-width="7" stroke-linecap="round"/>`));
-  // barrier beside the ops column
-  s.push(`<line x1="868" y1="455" x2="868" y2="865" stroke="#1b1e4a" stroke-width="1.4" stroke-dasharray="2 8" stroke-linecap="round"/>`);
+  // barrier beside the ops column, with an opening where the red lane passes between the Registration booths
+  [[455, 575], [605, 865]].forEach(([y1, y2]) =>
+    s.push(`<line x1="868" y1="${y1}" x2="868" y2="${y2}" stroke="#1b1e4a" stroke-width="1.4" stroke-dasharray="2 8" stroke-linecap="round"/>`));
   // rider-flow lanes
   const FLOW = [
-    // the y 587 lane stops at the ops barrier (x 868) so it doesn't block the Registration booths
-    [[684,300],[684,443]], [[868,587],[572,587],[572,443],[945,443],[945,587]],
+    // the y 587 lane passes through the barrier opening into the gap between the two Registration booths
+    [[684,300],[684,443]], [[572,443],[945,443],[945,587],[572,587],[572,443]],
     [[688,443],[688,765]], [[793,443],[793,587]],
     [[572,587],[572,765],[800,765]], [[798,587],[798,682]], [[695,682],[800,682],[800,742],[858,742],[858,830],[645,830],[645,870]],
     [[945,587],[945,795],[1000,795],[1000,850]]
