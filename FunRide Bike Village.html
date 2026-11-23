@@ -1,0 +1,1165 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>FunRide Bike Village</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: full-bleed 3D scene; floating map-legend style panels (navy / red / yellow flag stripe). Single light look by design. */
+:root{
+  --navy:#16187a; --navy-2:#23219c; --red:#c8202f; --yellow:#ffc928;
+  --panel:rgba(255,255,255,.95); --ink:#16183f; --muted:#5b5f86; --line:#dfe2ef; --sky:#cfe6f7;
+  --display:"Oswald","Arial Narrow",Impact,sans-serif; --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+html,body{height:100%;background:var(--sky);color:var(--ink);font-family:var(--body);overflow:hidden}
+#app{position:fixed;inset:0;overflow:hidden}
+#scene{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+#scene.hovering{cursor:pointer}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+
+.panel{background:var(--panel);border-radius:12px;box-shadow:0 6px 24px rgba(22,24,122,.16);backdrop-filter:blur(6px)}
+.stripe{display:flex;gap:4px}
+.stripe i{display:block;height:4px;border-radius:2px;width:22px}
+.stripe i:nth-child(1){background:var(--navy-2)}.stripe i:nth-child(2){background:var(--red)}.stripe i:nth-child(3){background:var(--yellow)}
+
+.brand{position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);left:max(16px,env(safe-area-inset-left,0px));padding:14px 16px 12px;display:grid;gap:6px;max-width:300px}
+.brand .eyebrow{font:600 11px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.brand h1{margin:0;font:700 28px/1 var(--display);letter-spacing:.02em;color:var(--navy);text-transform:uppercase}
+.brand .sub{font-size:12px;color:var(--muted)}
+.live{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:2px}
+.live .dot{display:inline-flex;align-items:center;gap:6px;font:700 11px/1 var(--display);letter-spacing:.1em;color:#fff;background:var(--red);padding:4px 7px;border-radius:4px}
+.live .dot::before{content:"";width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+
+.modes{position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:6px;padding:6px;flex-wrap:wrap;justify-content:flex-end}
+.modes button{border:0;background:transparent;padding:8px 12px;border-radius:8px;font:600 13px/1 var(--body);color:var(--navy)}
+.modes button:hover{background:#eef0fb}
+.modes button[aria-pressed="true"]{background:var(--navy);color:#fff}
+.modes .sep{width:1px;background:var(--line);margin:4px 2px}
+
+#dir{position:absolute;top:calc(env(safe-area-inset-top,0px) + 76px);right:max(16px,env(safe-area-inset-right,0px));width:280px;max-height:calc(100% - 300px);display:flex;flex-direction:column;overflow:hidden}
+#dir header{padding:12px 14px 8px;display:grid;gap:8px;border-bottom:1px solid var(--line)}
+#dir h2{margin:0;font:700 15px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--navy)}
+#dir input{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:14px var(--body);background:#fff;color:var(--ink)}
+#dir .list{overflow:auto;padding:6px 8px 12px}
+.grp{margin-top:8px}
+.grp h3{display:flex;align-items:center;gap:8px;margin:6px 6px 4px;font:700 12px/1.2 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--navy)}
+.sw{width:12px;height:12px;border-radius:3px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.grp button{display:flex;width:100%;text-align:left;border:0;background:transparent;padding:6px 8px 6px 26px;border-radius:6px;font-size:13px;color:var(--ink)}
+.grp button:hover,.grp button.on{background:#eef0fb;color:var(--navy)}
+.grp button small{margin-left:auto;color:var(--muted)}
+#dirToggle{display:none}
+
+#bar{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 16px);width:min(560px,calc(100% - 32px));padding:14px 16px;display:grid;gap:8px}
+#bar .kicker{display:flex;justify-content:space-between;gap:8px;font:600 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
+#bar .kicker span:last-child{color:var(--muted);font-variant-numeric:tabular-nums}
+#bar h2{margin:0;font:700 22px/1.1 var(--display);color:var(--navy);text-transform:uppercase;letter-spacing:.02em;text-wrap:balance}
+#bar p{margin:0;font-size:14px;line-height:1.5;color:var(--ink);max-width:62ch}
+.ctrls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ctrls button{border:1px solid var(--line);background:#fff;padding:8px 12px;border-radius:8px;font:600 13px/1 var(--body);color:var(--navy)}
+.ctrls button.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.ctrls button:hover{border-color:var(--navy)}
+.dots{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.dots button{width:9px;height:9px;padding:0;border-radius:50%;border:0;background:#cdd1e6}
+.dots button.on{background:var(--red)}
+.progress{height:3px;background:#e6e8f3;border-radius:2px;overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--yellow)}
+
+#info{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 16px);width:280px;padding:14px 16px;display:grid;gap:6px}
+#info .cat{display:flex;align-items:center;gap:8px;font:600 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+#info h3{margin:0;font:700 20px/1.1 var(--display);color:var(--navy);text-transform:uppercase}
+#info p{margin:0;font-size:13px;line-height:1.5}
+#info .size{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;font-size:12px;color:var(--muted)}
+#info .size b{font:700 13px/1.2 var(--body);color:#fff;background:var(--navy);padding:4px 7px;border-radius:5px;font-variant-numeric:tabular-nums}
+#info .x{position:absolute;top:8px;right:8px;border:0;background:transparent;font-size:18px;line-height:1;padding:6px;color:var(--muted)}
+
+#tags{position:absolute;inset:0;pointer-events:none}
+.tag{position:absolute;left:0;top:0;transform:translate(-50%,-100%);white-space:nowrap;font:600 11px/1 var(--body);color:#fff;background:var(--navy);padding:5px 7px;border-radius:5px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.tag::after{content:"";position:absolute;left:50%;bottom:-4px;margin-left:-4px;border:4px solid transparent;border-bottom:0;border-top-color:var(--navy)}
+.tag.hover{background:var(--red)}.tag.hover::after{border-top-color:var(--red)}
+
+#loading{position:absolute;inset:0;display:grid;place-items:center;background:var(--sky);font:700 18px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--navy);transition:opacity .6s}
+#loading.done{opacity:0;pointer-events:none}
+#toast{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 16px);transform:translate(-50%,-140%);background:var(--red);color:#fff;font:700 14px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;padding:9px 14px;border-radius:8px;transition:transform .35s;pointer-events:none}
+#toast.show{transform:translate(-50%,0)}
+
+@media (max-width:820px){
+  .brand{padding:10px 12px;max-width:calc(100% - 32px)}
+  .brand h1{font-size:22px}
+  .modes{top:auto;right:auto;left:max(16px,env(safe-area-inset-left,0px));bottom:auto;position:absolute;top:calc(env(safe-area-inset-top,0px) + 128px);flex-wrap:nowrap;overflow-x:auto;max-width:calc(100% - 32px);box-sizing:border-box;justify-content:flex-start}
+  .modes button{white-space:nowrap;padding:8px 10px}
+  #dirToggle{display:inline-block}
+  #dir{display:none;top:calc(env(safe-area-inset-top,0px) + 180px);left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));width:auto;max-height:calc(100% - 200px);z-index:5}
+  #dir.open{display:flex}
+  #bar{width:calc(100% - 32px);box-sizing:border-box;padding:12px}
+  #bar h2{font-size:18px}
+  #bar p{font-size:13px}
+  #info{left:max(16px,env(safe-area-inset-left,0px));width:auto;bottom:auto;top:calc(env(safe-area-inset-top,0px) + 180px);z-index:6}
+}
+@media (prefers-reduced-motion:reduce){.live .dot::before{animation:none}}
+</style>
+
+<div id="app">
+  <canvas id="scene" aria-label="3D model of the FunRide PH bike village at Rizal Park"></canvas>
+  <div id="tags"></div>
+
+  <header class="brand panel">
+    <div class="eyebrow">FunRide PH · Event site</div>
+    <h1>Bike Village</h1>
+    <div class="sub">Rizal Park, Manila · Booths at true size, site layout approximate</div>
+    <div class="stripe" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="live"><span class="dot">Live</span><span id="clock">--:--</span><span id="stats">Waiting for wave 1</span></div>
+  </header>
+
+  <nav class="modes panel" aria-label="View mode">
+    <button id="mTour" aria-pressed="true">Guided tour</button>
+    <button id="mWalk" aria-pressed="false">Walk the lanes</button>
+    <button id="mFree" aria-pressed="false">Explore freely</button>
+    <button id="mTop" aria-pressed="false">Top view</button>
+    <span class="sep"></span>
+    <button id="mSim" aria-pressed="true">Simulation on</button>
+    <button id="dirToggle" aria-pressed="false">Booth list</button>
+  </nav>
+
+  <aside id="dir" class="panel" aria-label="Booth directory">
+    <header>
+      <h2>Legend &amp; booth list</h2>
+      <input id="q" type="search" placeholder="Find a booth, e.g. EMS" autocomplete="off">
+    </header>
+    <div class="list" id="list"></div>
+  </aside>
+
+  <section id="bar" class="panel" aria-live="polite">
+    <div class="kicker"><span id="bKick">Guided tour</span><span id="bCount"></span></div>
+    <h2 id="bTitle">Welcome</h2>
+    <p id="bText"></p>
+    <div class="progress" id="bProg"><i></i></div>
+    <div class="ctrls" id="bCtrls">
+      <button id="prev" aria-label="Previous stop">Back</button>
+      <button id="play" class="primary">Pause tour</button>
+      <button id="next" aria-label="Next stop">Next</button>
+      <div class="dots" id="dots"></div>
+    </div>
+  </section>
+
+  <div id="info" class="panel" hidden>
+    <button class="x" id="infoX" aria-label="Close">×</button>
+    <div class="cat"><span class="sw" id="iSw"></span><span id="iCat"></span></div>
+    <h3 id="iName"></h3>
+    <div class="size" id="iSize" hidden><b id="iSzV"></b><span id="iType"></span></div>
+    <p id="iDesc"></p>
+  </div>
+  <div id="toast"></div>
+  <div id="loading">Building the bike village…</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+function boot(){
+"use strict";
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- map coordinates: 1 world unit = 10 map pixels ---------- */
+const S = 10, X = px => (px - 690) / S, Z = py => (py - 540) / S;
+const V3 = THREE.Vector3;
+const col = h => new THREE.Color(h).convertSRGBToLinear();
+
+/* ---------- legend categories (from the site map legend) ---------- */
+const CATS = {
+  stage:{name:'Stage & Tech',bg:'#1d1ea6',fg:'#ffffff'},
+  sponsor:{name:'Sponsors',bg:'#ffd23d',fg:'#1b1d6e'},
+  tent:{name:'Tents & Portalets',bg:'#3db2f0',fg:'#ffffff'},
+  byd:{name:'BYD & AC',bg:'#5cd6df',fg:'#132060'},
+  dot:{name:'DOT Booth',bg:'#ff7a1d',fg:'#ffffff'},
+  ops:{name:'Operations',bg:'#23219c',fg:'#ffffff'},
+  merch:{name:'Merchants',bg:'#c3ef69',fg:'#1f3a12'},
+  standby:{name:'Standby & Ramp',bg:'#1fae4a',fg:'#ffffff'},
+  start:{name:'Start & Finish',bg:'#861a1d',fg:'#ffffff'},
+  cardinal:{name:'Cardinal',bg:'#2f5b2c',fg:'#ffffff'},
+  restricted:{name:'Restricted',bg:'#141414',fg:'#7bd23a'},
+  landmark:{name:'Roads & landmarks',bg:'#ffffff',fg:'#16187a'}
+};
+
+/* ---------- every booth and marker on the map (x,y = centre in map pixels) ----------
+   Scale: 10 map px = 1 m = 1 world unit, so 1 ft = 3.048 px.
+   Booths with `ft:[along x, along y]` are drawn at their real size; `tent` picks the 3D model;
+   `back` is the side the back siding / back panel faces (n, s, e, w). */
+const FT = 3.048;
+const ITEMS = [
+  // Stage & Tech
+  {id:'stage',name:'Main Stage',cat:'stage',x:497,y:580,ft:[12,20],ht:.914,vert:1,kind:'stage',tent:'stage',sz:'L 20 ft × W 12 ft × H 3 ft',desc:'Main stage on the west side of the floor, facing the booth area.'},
+  {id:'satellite-stage',name:'Satellite Stage (KM 0)',cat:'stage',x:862,y:112,ft:[12,12],rot:30,ht:.914,tent:'stage',sz:'L 12 ft × W 12 ft × H 3 ft',label:'SATELLITE\nSTAGE',desc:'Satellite stage on the KM 0 plaza, near the start line.'},
+  {id:'tech',name:'Tech',cat:'stage',x:493,y:477,ft:[10,20],tent:'open',back:'w',vert:1,desc:'Tech booth just north of the stage.'},
+  // Sponsors
+  {id:'smoke10',name:'Smoke10',cat:'sponsor',x:509,y:414,ft:[10,10],rot:30,tent:'open',label:'SMOKE10',desc:'Sponsor booth between the BYD tent and Tech.'},
+  {id:'dro',name:'Dr. O',cat:'sponsor',x:728.6,y:523,ft:[7.5,10],tent:'open',sz:'10 ft × 15 ft, shared with Oxecure',label:'DR.O',desc:'Shares one 10 × 15 ft open tent with Oxecure, beside the DOT Booth.'},
+  {id:'oxecure',name:'Oxecure',cat:'sponsor',x:751.4,y:523,ft:[7.5,10],tent:'open',sz:'10 ft × 15 ft, shared with Dr. O',label:'OXECURE',desc:'Shares one 10 × 15 ft open tent with Dr. O.'},
+  {id:'neutrak',name:'Neutra K',cat:'sponsor',x:832,y:477,ft:[10,10],tent:'open',label:'NEUTRA K',desc:'Sponsor booth in the northeast queue block.'},
+  {id:'wertph',name:'Wert PH',cat:'sponsor',x:832,y:524,ft:[10,10],tent:'open',label:'WERT PH',desc:'Sponsor booth below Neutra K.'},
+  {id:'bdo',name:'BDO',cat:'sponsor',x:726,y:640,ft:[10,10],tent:'open',label:'BDO',desc:'Sponsor booth in the middle block.'},
+  {id:'specialign',name:'Specialign',cat:'sponsor',x:762,y:640,ft:[10,10],tent:'open',label:'SPECIALIGN',desc:'Sponsor booth beside BDO.'},
+  {id:'fitbar',name:'Fitbar',cat:'sponsor',x:838,y:638,ft:[10,10],tent:'open',label:'FITBAR',desc:'Sponsor booth in the east block.'},
+  {id:'cargoboss',name:'Cargo Boss',cat:'sponsor',x:838,y:673,ft:[10,10],tent:'open',label:'CARGO\nBOSS',desc:'Sponsor booth between Fitbar and Espace Wellness.'},
+  {id:'popcycle',name:'Popcycle',cat:'sponsor',x:725,y:716,ft:[10,10],tent:'open',label:'POPCYCLE',desc:'Sponsor booth in the south block.'},
+  {id:'gatorade',name:'Gatorade',cat:'sponsor',x:765,y:711.4,ft:[10,5],tent:'open',back:'e',sz:'10 ft × 10 ft, shared with Pepsi',label:'GATORADE',desc:'Shares one 10 × 10 ft open tent with Pepsi, beside Popcycle.'},
+  {id:'pepsi',name:'Pepsi',cat:'sponsor',x:765,y:726.6,ft:[10,5],tent:'open',back:'e',sz:'10 ft × 10 ft, shared with Gatorade',label:'PEPSI',desc:'Shares one 10 × 10 ft open tent with Gatorade.'},
+  {id:'espace',name:'Espace Wellness',cat:'sponsor',x:838,y:713,ft:[5,5],tent:'stall',label:'ESPACE\nWELLNESS',desc:'Booth stall only (no tent), below Cargo Boss.'},
+  // Tents & Portalets
+  {id:'byd-tent',name:'BYD Tent',cat:'tent',x:419,y:437,ft:[12,12],tent:'aircon',back:'w',label:'BYD',desc:'BYD VIP aircon tent, first in the row of tents along the west fence.'},
+  {id:'dot-tent',name:'DOT Tent',cat:'tent',x:419,y:533,ft:[12,12],tent:'aircon',back:'w',label:'DOT',desc:'DOT VIP aircon tent between the BYD tent and the artists tent.'},
+  {id:'artists-tent',name:'Artists & Other Sponsors Tent',cat:'tent',x:419,y:665,ft:[12,24],tent:'aircon',back:'w',vert:1,label:'ARTISTS & OTHER SPONSORS',desc:'VIP aircon tent for artists and other sponsors, linked to the Artists Entrance.'},
+  {id:'vip-portalets',name:'VIP Portalets',cat:'tent',x:330,y:558,w:26,h:74,ht:2.4,vert:1,label:'VIP PORTALETS',desc:'VIP portalets outside the west fence.'},
+  {id:'common-portalets-1',name:'Common Portalets (west)',cat:'tent',x:812,y:175,w:100,h:24,ht:2.4,label:'COMMON\nPORTALETS',desc:'Common portalets at the south edge of the KM 0 plaza, 1 of 2.'},
+  {id:'common-portalets-2',name:'Common Portalets (east)',cat:'tent',x:922,y:175,w:100,h:24,ht:2.4,label:'COMMON\nPORTALETS',desc:'Common portalets at the south edge of the KM 0 plaza, 2 of 2.'},
+  // DOT
+  {id:'dot-booth',name:'DOT Booth',cat:'dot',x:633,y:528,ft:[20,10],tent:'big',label:'DOT\nBOOTH',desc:'DOT big booth in the northwest queue block.'},
+  // BYD & AC (one 32 x 49 ft big booth, split into two halves)
+  {id:'ac',name:'AC Health / AC Mobility',cat:'byd',x:630,y:638.35,ft:[32,24.5],tent:'big',ht:2.8,sz:'32 ft × 49 ft big booth, shared with BYD Showroom',label:'AC HEALTH\nAC MOBILITY',desc:'North half of the 32 × 49 ft BYD Showroom / AC Health / AC Mobility big booth.'},
+  {id:'byd-showroom',name:'BYD Showroom',cat:'byd',x:630,y:713.05,ft:[32,24.5],tent:'big',ht:2.8,sz:'32 ft × 49 ft big booth, shared with AC Health / AC Mobility',label:'BYD\nSHOWROOM',desc:'South half of the 32 × 49 ft BYD Showroom / AC Health / AC Mobility big booth.'},
+  {id:'byd-td-reg',name:'BYD Test Drive Registration',cat:'byd',x:1086,y:888,ft:[10,10],tent:'open',label:'BYD TEST DRIVE\nREGISTRATION',desc:'Sign up here for the BYD Test Drive. Just outside the Entrance.'},
+  {id:'byd-td',name:'BYD Test Drive',cat:'byd',x:1177,y:937,w:224,h:30,ht:1.4,label:'BYD TEST DRIVE',desc:'BYD Test Drive area on Independence Road, by South Drive.'},
+  {id:'byd-garage',name:'BYD Garage',cat:'byd',x:1012,y:937,w:85,h:30,ht:1.4,label:'BYD GARAGE',desc:'BYD Garage on Independence Road, right beside the BYD Test Drive.'},
+  {id:'artists-entrance',name:'Artists Entrance',cat:'byd',x:238,y:923,w:88,h:32,label:'ARTISTS\nENTRANCE',desc:'Separate entrance for artists, with a path up to the west fence.'},
+  // Operations
+  // Operations column: tents with back sidings, back panel on the barrier (west) side
+  {id:'baggage',name:'Baggage Area',cat:'ops',x:890,y:495.7,ft:[10,30],tent:'back',back:'w',vert:1,label:'BAGGAGE AREA',desc:'Bag drop at the top of the operations column.'},
+  {id:'reg-1',name:'Registration (north)',cat:'ops',x:890,y:564.25,ft:[10,10],tent:'back',back:'w',vert:1,label:'REGIS-\nTRATION',desc:'Registration desk 1 of 2 in the operations column.'},
+  {id:'reg-2',name:'Registration (south)',cat:'ops',x:890,y:613.25,ft:[10,10],tent:'back',back:'w',vert:1,label:'REGIS-\nTRATION',desc:'Registration desk 2 of 2 in the operations column.'},
+  {id:'kit',name:'Kit Claiming',cat:'ops',x:890,y:685.7,ft:[10,30],tent:'back',back:'w',vert:1,label:'KIT CLAIMING',desc:'Claim your race kit here.'},
+  {id:'info',name:'Info / Lost & Found',cat:'ops',x:890,y:760.25,ft:[10,10],tent:'back',back:'w',vert:1,label:'INFO / LOST\n& FOUND',desc:'Information desk and lost and found.'},
+  {id:'command',name:'Command Center',cat:'ops',x:890,y:805.25,ft:[10,10],tent:'back',back:'w',vert:1,label:'COMMAND\nCENTER',desc:'Event command post.'},
+  {id:'ems',name:'EMS',cat:'ops',x:890,y:850.25,ft:[10,10],tent:'back',back:'w',label:'EMS',desc:'Emergency medical services, closest booth to the Entrance.'},
+  {id:'bike-check',name:'Bike Check Station',cat:'ops',x:648,y:322,ft:[10,10],tent:'open',back:'w',label:'BIKE\nCHECK',desc:'Bike check at the southeast corner of Standby per Wave.'},
+  {id:'bike-rack',name:'Bike Rack',cat:'ops',x:1019,y:625,w:66,h:325,ht:.6,vert:1,kind:'rack',label:'BIKE RACK',desc:'Long bike rack along the east fence.'},
+  {id:'bikes-coffee',name:'Bikes and Coffee',cat:'ops',x:1002,y:421,ft:[10,10],tent:'open',label:'BIKES &\nCOFFEE',desc:'Bikes and Coffee in the northeast corner, beside the bike rack.'},
+  {id:'myriad',name:'Myriad',cat:'ops',x:490,y:685,ft:[10,10],rot:-35,tent:'open',back:'w',label:'MYRIAD',desc:'Myriad booth beside the stage.'},
+  {id:'arf',name:'ARF',cat:'ops',x:512,y:722,ft:[10,10],rot:-35,tent:'open',back:'w',label:'ARF',desc:'ARF booth beside Myriad.'},
+  {id:'pw-21',name:'Photowall 21 KM',cat:'ops',x:727,y:405,w:44,h:16,kind:'wall',sz:'To follow',label:'21 KM',desc:'Photowall for 21 km finishers. Size to follow.'},
+  {id:'pw-10',name:'Photowall 10 KM',cat:'ops',x:790,y:405,w:44,h:16,kind:'wall',sz:'To follow',label:'10 KM',desc:'Photowall for 10 km finishers. Size to follow.'},
+  {id:'pw-5',name:'Photowall 5 KM',cat:'ops',x:866,y:405,w:44,h:16,kind:'wall',sz:'To follow',label:'5 KM',desc:'Photowall for 5 km finishers. Size to follow.'},
+  {id:'km21',name:'21 KM Marker',cat:'ops',x:340,y:980,w:44,h:16,ht:.9,label:'21 KM',desc:'21 km route marker on Independence Road.'},
+  // Merchants (2 named + 8 open slots)
+  {id:'m-open-1',name:'Open merchant slot 1',cat:'merch',x:619,y:794,ft:[10,10],tent:'open',label:'',desc:'Open merchant slot.'},
+  {id:'m-sugar',name:'Sugar High',cat:'merch',x:661,y:794,ft:[10,10],tent:'open',label:'SUGAR\nHIGH',desc:'Merchant booth in the first row.'},
+  {id:'m-swiss',name:'Swiss Proli & Take Out',cat:'merch',x:703,y:794,ft:[10,10],tent:'open',label:'SWISS PROLI\n& TAKE OUT',desc:'Merchant booth in the first row.'},
+  {id:'m-open-2',name:'Open merchant slot 2',cat:'merch',x:745,y:794,ft:[10,10],tent:'open',label:'',desc:'Open merchant slot.'},
+  {id:'m-open-3',name:'Open merchant slot 3',cat:'merch',x:787,y:794,ft:[10,10],tent:'open',label:'',desc:'Open merchant slot.'},
+  {id:'m-open-4',name:'Open merchant slot 4',cat:'merch',x:829,y:794,ft:[10,10],tent:'open',label:'',desc:'Open merchant slot.'},
+  {id:'m-open-5',name:'Open merchant slot 5',cat:'merch',x:705,y:865,ft:[10,10],tent:'open',label:'',desc:'Open merchant slot.'},
+  {id:'m-open-6',name:'Open merchant slot 6',cat:'merch',x:749,y:865,ft:[10,10],tent:'open',label:'',desc:'Open merchant slot.'},
+  {id:'m-open-7',name:'Open merchant slot 7',cat:'merch',x:793,y:865,ft:[10,10],tent:'open',label:'',desc:'Open merchant slot.'},
+  {id:'m-open-8',name:'Open merchant slot 8',cat:'merch',x:835,y:865,ft:[10,10],tent:'open',label:'',desc:'Open merchant slot.'},
+  // Standby & Ramp
+  {id:'standby',name:'Standby per Wave',cat:'standby',x:571,y:267,w:177,h:131,ht:.3,label:'STANDBY\nPER WAVE',desc:'Riders wait here by wave before heading to the start.'},
+  {id:'ramp',name:'Ramp',cat:'standby',x:676,y:140,w:22,h:40,vert:1,kind:'ramp',label:'RAMP',desc:'Green ramp up onto the KM 0 plaza, at the top of Exit to Start.'},
+  {id:'exit-to-start',name:'Exit to Start',cat:'standby',x:676,y:210,w:22,h:96,vert:1,kind:'ramp',white:1,label:'EXIT TO START',desc:'Lane from Standby per Wave north to the ramp and the start line.'},
+  // Start & Finish
+  {id:'start',name:'Start',cat:'start',x:895,y:65,w:20,h:66,kind:'arch',label:'START',desc:'Start line at KM 0 on Roxas Boulevard.'},
+  {id:'finish',name:'Finish',cat:'start',x:814,y:956,w:20,h:68,kind:'arch',label:'FINISH',desc:'Finish line on Independence Road.'},
+  // Cardinal
+  {id:'cardinal',name:'Cardinal',cat:'cardinal',x:560,y:935,w:62,h:18,ht:.9,label:'CARDINAL',desc:'Cardinal on Independence Road, west of the finish.'},
+  // Restricted
+  {id:'restricted',name:'Restricted Area',cat:'restricted',x:994,y:282,w:132,h:132,kind:'restricted',desc:'No setup in this area.'},
+  // Landmarks (roads and fixed places)
+  {id:'entrance',name:'Entrance',cat:'landmark',x:1008.5,y:882,w:66,h:16,kind:'gate',ends:[[985,905],[1032,859]],label:'ENTRANCE',desc:'Main entrance from Independence Road, at the southeast corner.'},
+  {id:'exit',name:'Exit',cat:'landmark',x:622,y:884,w:62,h:16,kind:'gate',ends:[[599,863],[645,905]],label:'EXIT',desc:'Exit at the southwest corner, past the merchants.'},
+  {id:'km0',name:'KM 0',cat:'landmark',x:784,y:103,w:46,h:14,kind:'none',desc:'Kilometer Zero, the plaza on the south side of Roxas Boulevard.'},
+  {id:'grandstand',name:'Quirino Grandstand',cat:'landmark',x:795,y:1035,w:646,h:77,kind:'none',desc:'Quirino Grandstand, south of Independence Road.'},
+  {id:'parking-w',name:'Parking (west)',cat:'landmark',x:192,y:1040,w:178,h:76,kind:'none',desc:'Parking lot southwest of the grandstand.'},
+  {id:'parking-e',name:'Parking (east)',cat:'landmark',x:1219,y:1040,w:136,h:76,kind:'none',desc:'Parking lot southeast of the grandstand.'}
+];
+const TENT = {back:'Tent with back siding', open:'Open tent', stall:'Booth stall only', big:'Big booth', aircon:'Aircon tent (VIP)', stage:'Stage'};
+const fmtFt = n => String(Math.round(n * 10) / 10);
+ITEMS.forEach(it => {
+  if (!it.ft) return;
+  it.w = it.ft[0] * FT; it.h = it.ft[1] * FT;
+  if (!it.sz) it.sz = `${fmtFt(it.ft[0])} ft × ${fmtFt(it.ft[1])} ft`;
+});
+const BY = {}; ITEMS.forEach(it => BY[it.id] = it);
+
+/* ---------- guided tour, in rider order ---------- */
+const TOUR = [
+  {t:'Welcome to the Bike Village',k:'Rizal Park, Manila',d:'The village sits on the lawn between Roxas Boulevard (north) and Independence Road (south). Riders start at KM 0 and finish on Independence Road. Watch the waves roll out live while you tour.',ids:[],target:[690,540],az:.2,el:.9,dist:118},
+  {t:'Entrance & BYD Test Drive',k:'Independence Road',d:'Guests walk in through the Entrance at the southeast corner. BYD Test Drive Registration is right outside the gate, and the BYD Garage and BYD Test Drive sit along Independence Road toward South Drive.',ids:['entrance','byd-td-reg','byd-garage','byd-td'],az:.35,el:.5,dist:34},
+  {t:'Operations column',k:'Operations',d:'Right inside the gate, a single column of tents with back sidings holds the services: EMS, Command Center, Info / Lost & Found and two Registration desks (10 × 10 ft each), plus Kit Claiming and the Baggage Area (10 × 30 ft each). A barrier runs along its west side.',ids:['ems','command','info','kit','reg-2','reg-1','baggage'],az:-1.15,el:.45,dist:38},
+  {t:'Bike Rack',k:'Operations',d:'The long bike rack runs along the east fence. Park here before you explore the booths.',ids:['bike-rack'],az:-.9,el:.55,dist:40},
+  {t:'Bikes and Coffee & Photowall',k:'Operations',d:'Bikes and Coffee sits in the northeast corner. Along the top of the queue lanes are the three photowalls: 21 KM, 10 KM and 5 KM.',ids:['bikes-coffee','pw-21','pw-10','pw-5'],az:.15,el:.45,dist:38},
+  {t:'Sponsor blocks, north',k:'Sponsors · DOT Booth',d:'The red rider-flow lanes split the floor into blocks. The north blocks hold the DOT Booth, Dr. O, Oxecure, Neutra K and Wert PH.',ids:['dot-booth','dro','oxecure','neutrak','wertph'],az:.15,el:.6,dist:32},
+  {t:'Sponsor blocks, south',k:'Sponsors',d:'Further down: BDO, Specialign, Fitbar, Cargo Boss, Popcycle, Gatorade, Pepsi and Espace Wellness.',ids:['bdo','specialign','fitbar','cargoboss','popcycle','gatorade','pepsi','espace'],az:.25,el:.6,dist:30},
+  {t:'AC Health, AC Mobility & BYD Showroom',k:'BYD & AC',d:'The southwest block holds AC Health / AC Mobility and, right below it, the BYD Showroom.',ids:['ac','byd-showroom'],az:.7,el:.5,dist:26},
+  {t:'Merchants',k:'Merchants',d:'Two rows of merchant booths sit near the exit: Sugar High and Swiss Proli & Take Out, plus 8 open merchant slots.',ids:['m-open-1','m-sugar','m-swiss','m-open-2','m-open-3','m-open-4','m-open-5','m-open-6','m-open-7','m-open-8'],az:.05,el:.55,dist:34},
+  {t:'Stage & Tech',k:'Stage & Tech · Operations',d:'The stage faces the floor from the west, with Tech to its north. Myriad and ARF sit beside the stage, and Smoke10 is just above Tech.',ids:['stage','tech','myriad','arf','smoke10'],az:1.25,el:.45,dist:36},
+  {t:'Tents along the west fence',k:'Tents & Portalets',d:'Three tents line the west fence: BYD, DOT, and Artists & Other Sponsors. VIP Portalets stand just outside the fence.',ids:['byd-tent','dot-tent','artists-tent','vip-portalets'],az:1.3,el:.5,dist:38},
+  {t:'Artists Entrance',k:'BYD & AC',d:'Artists come in from Independence Road through their own entrance and follow the path north to the artists tent.',ids:['artists-entrance'],target:[290,800],az:.6,el:.6,dist:34},
+  {t:'Standby per Wave',k:'Standby & Ramp',d:'Riders gather here by wave. Bike Check Station sits at its southeast corner. When a wave is called, it rides along Exit to Start and up the green Ramp to the KM 0 plaza.',ids:['standby','bike-check','exit-to-start','ramp'],az:-.45,el:.55,dist:40},
+  {t:'Common Portalets & restricted area',k:'Tents & Portalets · Restricted',d:'Two Common Portalets sit side by side at the south edge of the KM 0 plaza. The black circle is a restricted area with no setup.',ids:['common-portalets-1','common-portalets-2','restricted'],az:.3,el:.6,dist:40},
+  {t:'Start at KM 0',k:'Roxas Boulevard',d:'Each wave rides up from Standby and stops in a grid behind the START arch on Roxas Boulevard, beside the KM 0 plaza. The Satellite Stage sits on the plaza. Rizal Park is across the road.',ids:['start','km0','satellite-stage'],target:[910,70],az:-.5,el:.45,dist:34},
+  {t:'Finish on Independence Road',k:'Start & Finish · Cardinal',d:'Past the FINISH arch, bikes are parked in rows, all facing the BYD Test Drive. Cardinal sits west of the finish, and the 21 KM marker further down the road.',ids:['finish','cardinal','km21'],target:[800,955],az:-.15,el:.45,dist:46},
+  {t:'Quirino Grandstand',k:'Landmarks',d:'South of Independence Road: the Quirino Grandstand, with parking on both sides. That completes the tour.',ids:['grandstand','parking-w','parking-e'],az:3.0,el:.55,dist:66}
+];
+
+/* ---------- renderer ---------- */
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene();
+scene.background = col('#cfe6f7');
+scene.fog = new THREE.Fog(scene.background, 170, 340);
+const camera = new THREE.PerspectiveCamera(42, 1, .1, 800);
+camera.position.set(0, 90, 110);
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = .08;
+controls.maxPolarAngle = 1.47; controls.minDistance = 4; controls.maxDistance = 220;
+controls.target.set(0, 0, 0);
+
+scene.add(new THREE.HemisphereLight(col('#eaf4ff'), col('#6d8f55'), .75));
+const sun = new THREE.DirectionalLight(col('#fff4e0'), .95);
+sun.position.set(-45, 90, 55); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, {left:-80, right:80, top:80, bottom:-80, near:10, far:260});
+sun.shadow.bias = -.0005;
+scene.add(sun);
+
+/* ---------- textures with text ---------- */
+const FONT = 'Oswald, "Arial Narrow", Impact, sans-serif';
+function textCanvas(text, wU, hU, o){
+  o = o || {};
+  const ppu = o.ppu || 40;
+  let cw = Math.max(32, Math.round(wU * ppu)), ch = Math.max(32, Math.round(hU * ppu));
+  const k = Math.min(1, 1024 / Math.max(cw, ch)); cw = Math.round(cw * k); ch = Math.round(ch * k);
+  const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+  const g = cv.getContext('2d');
+  if (o.pill){
+    const r = Math.min(cw, ch) * .5;
+    g.fillStyle = o.bg; g.beginPath();
+    if (g.roundRect) g.roundRect(1, 1, cw - 2, ch - 2, r); else g.rect(0, 0, cw, ch);
+    g.fill();
+  } else if (o.bg){ g.fillStyle = o.bg; g.fillRect(0, 0, cw, ch); }
+  if (o.border){ g.strokeStyle = o.border; g.lineWidth = Math.max(2, Math.min(cw, ch) * .04); g.strokeRect(0, 0, cw, ch); }
+  if (text){
+    g.save();
+    let W = cw, H = ch;
+    if (o.vert){ g.translate(cw / 2, ch / 2); g.rotate(-Math.PI / 2); W = ch; H = cw; g.translate(-W / 2, -H / 2); }
+    const lines = text.split('\n');
+    let fs = H * (o.fill || .62) / lines.length;
+    g.font = `700 ${fs}px ${FONT}`;
+    const mw = Math.max(...lines.map(l => g.measureText(l).width));
+    const maxW = W * (o.pill ? .8 : .86);
+    if (mw > maxW) fs *= maxW / mw;
+    g.font = `700 ${fs}px ${FONT}`;
+    g.fillStyle = o.fg; g.textAlign = 'center'; g.textBaseline = 'middle';
+    lines.forEach((l, i) => g.fillText(l, W / 2, H / 2 + (i - (lines.length - 1) / 2) * fs * 1.08));
+    g.restore();
+  }
+  const t = new THREE.CanvasTexture(cv);
+  t.encoding = THREE.sRGBEncoding; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+}
+function faceMat(text, wU, hU, bg, fg, vert){
+  if (!text || wU * hU < .35) return new THREE.MeshStandardMaterial({color:col(bg), roughness:.75});
+  return new THREE.MeshStandardMaterial({map:textCanvas(text, wU, hU, {bg, fg, vert}), roughness:.75});
+}
+function flatLabel(text, px, py, wpx, hpx, o){
+  o = o || {};
+  const w = wpx / S, h = hpx / S;
+  const tex = textCanvas(text, w, h, Object.assign({bg:'#ffffff', fg:'#16187a', pill:true, ppu:60}, o));
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({map:tex, transparent:true, depthWrite:false}));
+  m.rotation.x = -Math.PI / 2;
+  if (o.rot) m.rotation.z = o.rot * Math.PI / 180;
+  m.position.set(X(px), o.y || .08, Z(py));
+  m.renderOrder = 2;
+  scene.add(m);
+  return m;
+}
+
+/* ---------- ground ---------- */
+function rect(x1, y1, x2, y2, color, y, recv){
+  const m = new THREE.Mesh(new THREE.PlaneGeometry((x2 - x1) / S, (y2 - y1) / S), new THREE.MeshStandardMaterial({color:col(color), roughness:1}));
+  m.rotation.x = -Math.PI / 2; m.position.set(X((x1 + x2) / 2), y, Z((y1 + y2) / 2));
+  m.receiveShadow = recv !== false; scene.add(m); return m;
+}
+function polyFloor(pts, color, y){
+  const sh = new THREE.Shape(pts.map(([x, yy]) => new THREE.Vector2(X(x), -Z(yy))));
+  const m = new THREE.Mesh(new THREE.ShapeGeometry(sh), new THREE.MeshStandardMaterial({color:col(color), roughness:.95}));
+  m.rotation.x = -Math.PI / 2; m.position.y = y; m.receiveShadow = true; scene.add(m); return m;
+}
+rect(-400, -400, 1800, 1500, '#e6e9e3', -.05);               // surrounding paving
+rect(93, 0, 1293, 32, '#8fc46f', 0);                          // Rizal Park strip
+rect(162, 98, 1232, 922, '#9fd07f', 0);                       // lawn
+const ASPH = '#70757f';
+rect(93, 32, 1293, 98, ASPH, .01);                            // Roxas Boulevard
+rect(93, 98, 162, 990, ASPH, .01);                            // Katigbak Parkway
+rect(1232, 98, 1262, 990, ASPH, .011);                        // South Drive
+rect(93, 922, 1262, 990, ASPH, .012);                         // Independence Road
+rect(105, 1000, 282, 1077, '#d4d8dd', .01);                   // parking west
+rect(1152, 1000, 1287, 1077, '#d4d8dd', .01);                 // parking east
+rect(566, 100, 1015, 185, '#efe4cf', .02);                    // KM 0 plaza
+const VENUE = [[362,378],[655,352],[815,380],[1065,380],[1065,790],[1010,905],[640,905],[550,812],[362,748]];
+polyFloor(VENUE, '#f2f4f9', .03);
+
+// lane markings
+const dashMat = new THREE.MeshBasicMaterial({color:col('#f3f3f0')});
+function dashes(x1, y1, x2, y2, dash, gap, width, y, mat){
+  const a = new V3(X(x1), 0, Z(y1)), b = new V3(X(x2), 0, Z(y2));
+  const L = a.distanceTo(b), dir = b.clone().sub(a).normalize(), ang = Math.atan2(-dir.z, dir.x);
+  const geo = new THREE.BoxGeometry(dash, .02, width);
+  const n = Math.floor(L / (dash + gap));
+  const im = new THREE.InstancedMesh(geo, mat || dashMat, n);
+  const o = new THREE.Object3D();
+  for (let i = 0; i < n; i++){
+    const d = i * (dash + gap) + dash / 2;
+    o.position.copy(a).addScaledVector(dir, d); o.position.y = y || .03; o.rotation.set(0, ang, 0); o.updateMatrix();
+    im.setMatrixAt(i, o.matrix);
+  }
+  scene.add(im); return im;
+}
+dashes(100, 65, 1290, 65, 1.6, 1.4, .18);
+dashes(133, 110, 133, 915, 1.6, 1.4, .18);
+dashes(1247, 110, 1247, 915, 1.6, 1.4, .14);
+dashes(100, 956, 1255, 956, 1.6, 1.4, .18);
+// parking stalls
+for (let i = 0; i < 9; i++){ dashes(115 + i * 19, 1005, 115 + i * 19, 1035, .3, 0, .08, .03); }
+for (let i = 0; i < 7; i++){ dashes(1160 + i * 19, 1005, 1160 + i * 19, 1035, .3, 0, .08, .03); }
+
+// road & place labels (as printed on the map)
+flatLabel('RIZAL PARK', 769, 22, 112, 18);
+flatLabel('ROXAS BOULEVARD', 769, 63, 170, 24);
+flatLabel('KM 0', 784, 103, 46, 14);
+flatLabel('KATIGBAK PARKWAY', 133, 440, 24, 180, {vert:true});
+flatLabel('SOUTH DRIVE', 1249, 440, 22, 140, {vert:true});
+flatLabel('INDEPENDENCE ROAD', 180, 958, 146, 22);
+flatLabel('PHOTOWALL', 757, 426, 90, 14, {bg:null, pill:false, fg:'#16183f'});
+flatLabel('MERCHANTS', 775, 821, 90, 14, {bg:null, pill:false, fg:'#16183f'});
+flatLabel('PARKING', 192, 1040, 90, 16, {bg:null, pill:false, fg:'#5b5f75'});
+flatLabel('PARKING', 1219, 1040, 90, 16, {bg:null, pill:false, fg:'#5b5f75'});
+
+/* ---------- fences, barriers, rider flow, artists path ---------- */
+const fenceMat = new THREE.MeshStandardMaterial({color:col('#1b1e4a'), roughness:.6});
+function wallSeg(x1, y1, x2, y2, h, t, mat){
+  const a = new V3(X(x1), 0, Z(y1)), b = new V3(X(x2), 0, Z(y2));
+  const L = a.distanceTo(b);
+  const m = new THREE.Mesh(new THREE.BoxGeometry(L, h, t), mat);
+  m.position.copy(a).lerp(b, .5); m.position.y = h / 2;
+  m.rotation.y = Math.atan2(-(b.z - a.z), b.x - a.x);
+  m.castShadow = true; m.receiveShadow = true; scene.add(m); return m;
+}
+function polyWall(pts, h, t, mat){ for (let i = 1; i < pts.length; i++) wallSeg(pts[i-1][0], pts[i-1][1], pts[i][0], pts[i][1], h, t, mat); }
+polyWall([[655,352],[362,378],[362,668]], 1.0, .16, fenceMat);
+polyWall([[362,700],[362,748],[550,812]], 1.0, .16, fenceMat);
+polyWall([[815,381],[1065,381],[1065,790]], 1.0, .16, fenceMat);
+polyWall([[375,1022],[628,1055]], .9, .14, fenceMat);           // barrier by the grandstand
+// grass hedge closing the south edge: only the Exit and the Entrance stay open
+{
+  const hedgeM = new THREE.MeshStandardMaterial({color:col('#4f9a3a'), roughness:1});
+  const bushM = new THREE.MeshStandardMaterial({color:col('#5fae45'), roughness:1, flatShading:true});
+  const segs = [[[550,812],[599,863]], [[645,905],[985,905]], [[1065,790],[1032,859]]];
+  const bushes = [];
+  segs.forEach(([a, b]) => {
+    const w = wallSeg(a[0], a[1], b[0], b[1], .7, .9, hedgeM);
+    w.userData.hedge = true;
+    const A = new V3(X(a[0]), 0, Z(a[1])), B = new V3(X(b[0]), 0, Z(b[1])), n = Math.max(2, Math.round(A.distanceTo(B) / .8));
+    for (let i = 0; i <= n; i++) bushes.push(A.clone().lerp(B, i / n));
+  });
+  const im = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.55, 0), bushM, bushes.length), o = new THREE.Object3D();
+  bushes.forEach((p, i) => { o.position.set(p.x, .75, p.z); o.rotation.set(Math.random() * 3, Math.random() * 3, 0); o.scale.setScalar(.85 + Math.random() * .3); o.updateMatrix(); im.setMatrixAt(i, o.matrix); });
+  im.castShadow = im.receiveShadow = true; scene.add(im);
+}
+// barrier beside the ops column (posts)
+{
+  const geo = new THREE.CylinderGeometry(.07, .07, .8, 6), n = 42;
+  const im = new THREE.InstancedMesh(geo, fenceMat, n), o = new THREE.Object3D();
+  for (let i = 0; i < n; i++){ o.position.set(X(868), .4, Z(455 + i * 10)); o.updateMatrix(); im.setMatrixAt(i, o.matrix); }
+  im.castShadow = true; scene.add(im);
+}
+// rider flow (red dotted queue lanes)
+const flowMat = new THREE.MeshBasicMaterial({color:col('#d3202f')});
+const FLOW = [
+  [[684,300],[684,443]],
+  [[572,443],[945,443],[945,587],[572,587],[572,443]],
+  [[688,443],[688,765]], [[793,443],[793,587]],
+  [[572,587],[572,765],[800,765]], [[798,587],[798,682]], [[695,682],[800,682],[800,742],[858,742],[858,830],[645,830],[645,870]],
+  [[945,587],[945,795],[1000,795],[1000,850]]
+];
+FLOW.forEach(pl => { for (let i = 1; i < pl.length; i++) dashes(pl[i-1][0], pl[i-1][1], pl[i][0], pl[i][1], .45, .45, .2, .05, flowMat); });
+// artists path
+const pathMat = new THREE.MeshStandardMaterial({color:col('#2a2c3a'), roughness:1});
+[[[370,684],[272,684]],[[272,684],[252,740]],[[252,740],[252,905]]].forEach(([a, b]) => {
+  const s = wallSeg(a[0], a[1], b[0], b[1], .04, .9, pathMat); s.castShadow = false;
+  dashes(a[0], a[1], b[0], b[1], .5, .5, .12, .05);
+});
+
+/* ---------- builders ---------- */
+const pickables = [];
+const ROOT = {};
+function register(it, group){ group.traverse(o => { if (o.isMesh){ o.userData.item = it; pickables.push(o); o.castShadow = true; o.receiveShadow = true; } }); ROOT[it.id] = group; }
+
+function boxBooth(it, opt){
+  const c = CATS[it.cat], w = it.w / S, d = it.h / S, h = (opt && opt.ht) || it.ht || 2.2;
+  const label = it.label != null ? it.label : it.name.toUpperCase();
+  const flat = label.replace(/\n/g, ' ');
+  const mats = [
+    faceMat(flat, d, h, c.bg, c.fg), faceMat(flat, d, h, c.bg, c.fg),
+    new THREE.MeshStandardMaterial({map:textCanvas(label, w, d, {bg:c.bg, fg:c.fg, vert:it.vert}), roughness:.7}),
+    new THREE.MeshStandardMaterial({color:col(c.bg)}),
+    faceMat(flat, w, h, c.bg, c.fg), faceMat(flat, w, h, c.bg, c.fg)
+  ];
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mats);
+  m.position.y = h / 2;
+  return m;
+}
+/* ---------- tents at true size: open, back siding, aircon, stall ---------- */
+const poleMat = new THREE.MeshStandardMaterial({color:col('#d9dce6'), roughness:.4, metalness:.3});
+const tableMat = new THREE.MeshStandardMaterial({color:col('#f7f7f4'), roughness:.8});
+const BACKDIR = {n:[0, -1], s:[0, 1], e:[1, 0], w:[-1, 0]};
+function tentBooth(it){
+  const c = CATS[it.cat], w = it.w / S, d = it.h / S, g = new THREE.Group();
+  const label = it.label != null ? it.label : it.name.toUpperCase();
+  const flat = label.replace(/\n/g, ' ');
+  const [bx, bz] = BACKDIR[it.back || 'n'];
+  const plain = new THREE.MeshStandardMaterial({color:col(c.bg), roughness:.7});
+  const topMat = new THREE.MeshStandardMaterial({map:textCanvas(label, w, d, {bg:c.bg, fg:c.fg, vert:it.vert}), roughness:.7});
+  // footprint on the ground, so the real size reads in top view too
+  const pad = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({color:col(c.bg), roughness:1, transparent:true, opacity:.35}));
+  pad.rotation.x = -Math.PI / 2; pad.position.y = .045; g.add(pad);
+
+  if (it.tent === 'stall'){
+    // booth stall only: counter + back panel with header
+    const counter = new THREE.Mesh(new THREE.BoxGeometry(w * .9, 1, .5), [plain, plain, topMat, plain, faceMat(flat, w * .9, 1, c.bg, c.fg), faceMat(flat, w * .9, 1, c.bg, c.fg)]);
+    counter.position.set(0, .5, d / 2 - .35); g.add(counter);
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(w, 2.2, .08), [plain, plain, plain, plain, faceMat(flat, w, 2.2, c.bg, c.fg), plain]);
+    panel.position.set(0, 1.1, -d / 2 + .1); g.add(panel);
+    it.top = 2.2; return g;
+  }
+
+  if (it.tent === 'aircon'){
+    // enclosed VIP tent: white walls, peaked roof, door on the front, AC unit at the back
+    const wallH = 2.5, white = new THREE.MeshStandardMaterial({color:col('#f4f6fb'), roughness:.6});
+    const wallFace = (a, b) => faceMat(flat, a, b, '#f4f6fb', '#16187a');
+    const box = new THREE.Mesh(new THREE.BoxGeometry(w, wallH, d), [wallFace(d, wallH), wallFace(d, wallH), white, white, wallFace(w, wallH), wallFace(w, wallH)]);
+    box.position.y = wallH / 2; g.add(box);
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(w + .3, .22, d + .3), [plain, plain, topMat, plain, plain, plain]);
+    roof.position.y = wallH + .11; g.add(roof);
+    const door = new THREE.Mesh(new THREE.PlaneGeometry(1, 2.1), new THREE.MeshStandardMaterial({color:col('#2a2c3a')}));
+    door.position.set(-bx * (w / 2 + .01), 1.05, -bz * (d / 2 + .01)); door.rotation.y = Math.atan2(-bx, -bz); g.add(door);
+    const ac = new THREE.Mesh(new THREE.BoxGeometry(.9, .7, .5), new THREE.MeshStandardMaterial({color:col('#c9ced8'), roughness:.5}));
+    ac.position.set(bx * (w / 2 + .3), .35, bz * (d / 2 + .3)); ac.rotation.y = Math.atan2(bx, bz); g.add(ac);
+    it.top = wallH + .3; return g;
+  }
+
+  // pop-up canopy (open tent / tent with back siding)
+  const eave = 2.3, valH = .3;
+  [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sz]) => {
+    const p = new THREE.Mesh(new THREE.CylinderGeometry(.04, .04, eave, 6), poleMat);
+    p.position.set(sx * (w / 2 - .05), eave / 2, sz * (d / 2 - .05)); g.add(p);
+  });
+  const canopy = new THREE.Mesh(new THREE.BoxGeometry(w, valH, d), [
+    faceMat(flat, d, valH * 3, c.bg, c.fg), faceMat(flat, d, valH * 3, c.bg, c.fg), topMat, plain,
+    faceMat(flat, w, valH * 3, c.bg, c.fg), faceMat(flat, w, valH * 3, c.bg, c.fg)]);
+  canopy.position.y = eave + valH / 2; g.add(canopy);
+  if (it.tent === 'back'){
+    const along = bx !== 0 ? d : w;
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(along, eave, .05), plain);
+    wall.position.set(bx * (w / 2 - .03), eave / 2, bz * (d / 2 - .03));
+    wall.rotation.y = bx !== 0 ? Math.PI / 2 : 0; g.add(wall);
+  }
+  // service table along the front
+  const fx = -bx, fz = -bz, tl = (fx !== 0 ? d : w) * .8;
+  const table = new THREE.Mesh(new THREE.BoxGeometry(tl, .75, .6), tableMat);
+  table.position.set(fx * (w / 2 - .5), .375, fz * (d / 2 - .5));
+  table.rotation.y = fx !== 0 ? Math.PI / 2 : 0; g.add(table);
+  it.top = eave + valH; return g;
+}
+
+function place(it, g){
+  g.position.set(X(it.x), 0, Z(it.y));
+  if (it.rot) g.rotation.y = it.rot * Math.PI / 180;
+  scene.add(g); register(it, g);
+}
+
+function build(it){
+  const g = new THREE.Group();
+  const c = CATS[it.cat];
+  switch (it.kind){
+    case 'none': ROOT[it.id] = null; return;
+    case 'stage': {
+      g.add(boxBooth(it));
+      const back = new THREE.Mesh(new THREE.BoxGeometry(.35, 4, it.h / S), [
+        faceMat('STAGE', it.h / S, 4, c.bg, '#ffffff'), new THREE.MeshStandardMaterial({color:col(c.bg)}),
+        new THREE.MeshStandardMaterial({color:col(c.bg)}), new THREE.MeshStandardMaterial({color:col(c.bg)}),
+        new THREE.MeshStandardMaterial({color:col(c.bg)}), new THREE.MeshStandardMaterial({color:col(c.bg)})]);
+      back.position.set(-it.w / S / 2 + .2, it.ht + 2, 0); g.add(back);
+      // speaker stacks
+      [-1, 1].forEach(s => { const sp = new THREE.Mesh(new THREE.BoxGeometry(.8, 1.6, .8), new THREE.MeshStandardMaterial({color:col('#1a1a22')})); sp.position.set(it.w / S / 2 - .5, it.ht + .8, s * (it.h / S / 2 - .6)); g.add(sp); });
+      break;
+    }
+    case 'wall': {
+      const w = it.w / S, h = 2.6, d = .35;
+      const front = new THREE.MeshStandardMaterial({map:textCanvas(it.label + '\nPHOTOWALL', w, h, {bg:c.bg, fg:'#ffffff', fill:.55})});
+      const plain = new THREE.MeshStandardMaterial({color:col(c.bg)});
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), [plain, plain, plain, plain, front, front]);
+      m.position.y = h / 2; g.add(m);
+      const base = new THREE.Mesh(new THREE.BoxGeometry(w + .2, .12, it.h / S), new THREE.MeshStandardMaterial({map:textCanvas(it.label, w + .2, it.h / S, {bg:c.bg, fg:'#fff'})}));
+      base.position.y = .06; g.add(base);
+      break;
+    }
+    case 'rack': {
+      g.add(boxBooth(it));
+      const n = 30, wheels = new THREE.InstancedMesh(new THREE.TorusGeometry(.3, .045, 6, 14), new THREE.MeshStandardMaterial({color:col('#15161c')}), n * 4);
+      const frames = new THREE.InstancedMesh(new THREE.BoxGeometry(.85, .06, .06), new THREE.MeshStandardMaterial({color:col('#e8eaf2')}), n * 2);
+      const o = new THREE.Object3D(); let wi = 0, fi = 0;
+      for (let i = 0; i < n; i++){
+        const z = -it.h / S / 2 + 1 + i * ((it.h / S - 2) / (n - 1));
+        [-1, 1].forEach(side => {
+          const x = side * (it.w / S / 2 + .45);
+          // bike pointing east-west, parked against the rack
+          [-.42, .42].forEach(off => { o.position.set(x + off, .32, z); o.rotation.set(0, 0, 0); o.updateMatrix(); wheels.setMatrixAt(wi++, o.matrix); });
+          o.position.set(x, .55, z); o.updateMatrix(); frames.setMatrixAt(fi++, o.matrix);
+        });
+      }
+      wheels.castShadow = frames.castShadow = true;
+      g.add(wheels, frames);
+      break;
+    }
+    case 'ramp': {
+      const w = it.w / S, d = it.h / S;
+      const bg = it.white ? '#ffffff' : c.bg, fg = it.white ? '#16183f' : '#ffffff';
+      const side = new THREE.MeshStandardMaterial({color:col(bg)});
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(w, .25, d), [side, side,
+        new THREE.MeshStandardMaterial({map:textCanvas(it.label, w, d, {bg, fg, vert:true})}), side, side, side]);
+      slab.position.y = .13; g.add(slab);
+      [-1, 1].forEach(sd => { const r = new THREE.Mesh(new THREE.BoxGeometry(.08, .8, d), fenceMat); r.position.set(sd * w / 2, .4, 0); g.add(r); });
+      break;
+    }
+    case 'arch': {
+      const span = it.h / S, r = span / 2;
+      const tube = new THREE.Mesh(new THREE.TorusGeometry(r, .45, 12, 40, Math.PI), new THREE.MeshStandardMaterial({color:col(c.bg), roughness:.5}));
+      tube.rotation.y = Math.PI / 2; g.add(tube);
+      const bw = 1.4, bl = span * .8;
+      const lab = textCanvas(it.label, bl, bw, {bg:c.bg, fg:'#ffffff'});
+      const plain = new THREE.MeshStandardMaterial({color:col(c.bg)});
+      const banner = new THREE.Mesh(new THREE.BoxGeometry(.3, bw, bl), [
+        new THREE.MeshStandardMaterial({map:lab}), new THREE.MeshStandardMaterial({map:lab}), plain, plain, plain, plain]);
+      banner.position.y = r + .2; g.add(banner);
+      const sign = new THREE.Mesh(new THREE.BoxGeometry(it.w / S * .9, .1, 3), new THREE.MeshStandardMaterial({map:textCanvas(it.label, it.w / S * .9, 3, {bg:c.bg, fg:'#fff', vert:true})}));
+      sign.position.y = .05; g.add(sign);
+      // checkered line on the road
+      const line = new THREE.Mesh(new THREE.BoxGeometry(.5, .03, span), new THREE.MeshStandardMaterial({color:col('#ffffff')}));
+      line.position.set(.6, .03, 0); g.add(line);
+      break;
+    }
+    case 'restricted': {
+      const r = it.w / S / 2;
+      const disk = new THREE.Mesh(new THREE.CylinderGeometry(r, r, .2, 48), new THREE.MeshStandardMaterial({color:col('#141414'), roughness:.9}));
+      disk.position.y = .1; g.add(disk);
+      const xm = new THREE.MeshStandardMaterial({color:col('#7bd23a'), emissive:col('#2b5a10')});
+      [45, -45].forEach(a => { const b = new THREE.Mesh(new THREE.BoxGeometry(r * 1.1, .12, .9), xm); b.position.y = .26; b.rotation.y = a * Math.PI / 180; g.add(b); });
+      const n = 24, posts = new THREE.InstancedMesh(new THREE.CylinderGeometry(.08, .08, 1, 6), new THREE.MeshStandardMaterial({color:col('#e9c21b')}), n), o = new THREE.Object3D();
+      for (let i = 0; i < n; i++){ const a = i / n * Math.PI * 2; o.position.set(Math.cos(a) * (r + .3), .5, Math.sin(a) * (r + .3)); o.updateMatrix(); posts.setMatrixAt(i, o.matrix); }
+      g.add(posts);
+      break;
+    }
+    case 'gate': {
+      // span exactly between the two hedge ends that frame the opening
+      const [a, b] = it.ends;
+      const A = new V3(X(a[0]), 0, Z(a[1])), B = new V3(X(b[0]), 0, Z(b[1]));
+      const w = A.distanceTo(B);
+      const mid = A.clone().lerp(B, .5);
+      it.x = mid.x * S + 690; it.y = mid.z * S + 540;
+      it.rot = Math.atan2(-(B.z - A.z), B.x - A.x) * 180 / Math.PI;
+      const postH = 3.2, signH = .9, white = new THREE.MeshStandardMaterial({color:col('#ffffff')});
+      const face = new THREE.MeshStandardMaterial({map:textCanvas(it.label, w - .4, signH, {bg:'#ffffff', fg:'#16183f'})});
+      const sign = new THREE.Mesh(new THREE.BoxGeometry(w - .4, signH, .18), [white, white, white, white, face, face]);
+      sign.position.y = postH - signH / 2 - .1; g.add(sign);
+      [-1, 1].forEach(sd => {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(.22, postH, .22), fenceMat);
+        post.position.set(sd * (w / 2 - .11), postH / 2, 0); g.add(post);
+        const foot = new THREE.Mesh(new THREE.BoxGeometry(.5, .12, .5), fenceMat);
+        foot.position.set(sd * (w / 2 - .11), .06, 0); g.add(foot);
+      });
+      const top = new THREE.Mesh(new THREE.BoxGeometry(w, .14, .26), fenceMat);
+      top.position.y = postH + .07; g.add(top);
+      break;
+    }
+    default: {
+      if (it.tent && it.tent !== 'big' && it.tent !== 'stage') g.add(tentBooth(it));
+      else g.add(boxBooth(it, it.tent === 'big' ? {ht:it.ht || 2.6} : null));
+      if (it.cat === 'merch' && !it.label){
+        // open slot: see-through canopy with a small "OPEN SLOT" sign
+        g.traverse(o => { if (o.isMesh) [].concat(o.material).forEach(m => { m.transparent = true; m.opacity = Math.min(m.opacity, .55); }); });
+        const s = new THREE.Mesh(new THREE.PlaneGeometry(2.4, .7), new THREE.MeshBasicMaterial({map:textCanvas('OPEN SLOT', 2.4, .7, {bg:'#ffffff', fg:'#1f3a12', pill:true}), transparent:true}));
+        s.position.set(0, (it.top || it.ht || 2.2) + .02, 0); s.rotation.x = -Math.PI / 2; g.add(s);
+      }
+    }
+  }
+  place(it, g);
+}
+ITEMS.forEach(build);
+
+/* ---------- Quirino Grandstand ---------- */
+{
+  const pts = [[472,998],[1118,998],[1118,1040],[1000,1075],[600,1075],[472,1040]];
+  const sh = new THREE.Shape(pts.map(([x, y]) => new THREE.Vector2(X(x), -Z(y))));
+  const baseH = .3;
+  const base = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, {depth:baseH, bevelEnabled:false}), new THREE.MeshStandardMaterial({color:col('#efe2d2'), roughness:.9}));
+  base.rotation.x = -Math.PI / 2; base.castShadow = base.receiveShadow = true; scene.add(base);
+  base.userData.item = BY.grandstand; pickables.push(base);
+  // red outline traced exactly on the top edge of the base
+  const edge = pts.concat([pts[0]]).map(([x, y]) => new V3(X(x), baseH + .01, Z(y)));
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(edge), new THREE.LineBasicMaterial({color:col('#c8202f')})));
+  // seating steps: same length, rising toward the back, all aligned on one edge
+  const tierCols = ['#f6ebdd','#ecdcc8'];
+  for (let i = 0; i < 4; i++){
+    const y1 = 1000 + i * 10, h = baseH + .35 * (i + 1);
+    const m = new THREE.Mesh(new THREE.BoxGeometry((1110 - 480) / S, h, 10 / S), new THREE.MeshStandardMaterial({color:col(tierCols[i % 2]), roughness:.85}));
+    m.position.set(X(795), h / 2, Z(y1 + 5));
+    m.castShadow = m.receiveShadow = true; scene.add(m);
+    m.userData.item = BY.grandstand; pickables.push(m);
+  }
+  flatLabel('QUIRINO GRANDSTAND', 800, 1058, 232, 26, {y:baseH + .02});
+}
+
+/* ---------- trees (9, as drawn) ---------- */
+const trees = [];
+{
+  const trunkM = new THREE.MeshStandardMaterial({color:col('#6b4a2b')});
+  const leafM = new THREE.MeshStandardMaterial({color:col('#4c9a35'), roughness:.9, flatShading:true});
+  [[749,226,2.6],[797,212,2.4],[844,238,2.1],[737,281,2.8],[790,266,3.1],[838,292,2.4],[761,330,2.5],[811,333,2.4],[856,346,1.9]].forEach(([x, y, r]) => {
+    const t = new THREE.Group();
+    const tr = new THREE.Mesh(new THREE.CylinderGeometry(.25, .35, 2.4, 7), trunkM); tr.position.y = 1.2; t.add(tr);
+    const lf = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 1), leafM); lf.position.y = 2.4 + r * .8; t.add(lf);
+    t.position.set(X(x), 0, Z(y)); t.traverse(o => { if (o.isMesh){ o.castShadow = o.receiveShadow = true; } });
+    t.userData.seed = Math.random() * 6; scene.add(t); trees.push(t);
+  });
+}
+
+/* ---------- parked cars ---------- */
+{
+  const carCols = ['#d9dde3','#2b2f3a','#b8262f','#3b5fb0','#f2f2f2','#7a7f88'];
+  const spots = [];
+  for (let i = 0; i < 8; i++) if (i % 3 !== 1) spots.push([124.5 + i * 19, 1020]);
+  for (let i = 0; i < 6; i++) if (i % 2 === 0) spots.push([1169.5 + i * 19, 1020]);
+  spots.forEach(([x, y], i) => {
+    const g = new THREE.Group(), m = new THREE.MeshStandardMaterial({color:col(carCols[i % carCols.length]), roughness:.4});
+    const b = new THREE.Mesh(new THREE.BoxGeometry(1.4, .6, 2.6), m); b.position.y = .45; g.add(b);
+    const cab = new THREE.Mesh(new THREE.BoxGeometry(1.2, .5, 1.3), new THREE.MeshStandardMaterial({color:col('#9fc3dd'), roughness:.2})); cab.position.set(0, .95, -.1); g.add(cab);
+    g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    g.position.set(X(x), 0, Z(y)); scene.add(g);
+  });
+}
+
+/* ---------- path helper ---------- */
+function mkPath(pts){
+  const p = pts.map(q => new V3(X(q[0]), 0, Z(q[1])));
+  const L = [0]; for (let i = 1; i < p.length; i++) L.push(L[i-1] + p[i].distanceTo(p[i-1]));
+  return {p, L, len:L[L.length-1], at(d, out, dir){
+    d = Math.max(0, Math.min(d, this.len)); let i = 1;
+    while (i < L.length - 1 && L[i] < d) i++;
+    const t = (d - L[i-1]) / ((L[i] - L[i-1]) || 1);
+    out.lerpVectors(p[i-1], p[i], t);
+    if (dir) dir.subVectors(p[i], p[i-1]).normalize();
+    return out;
+  }};
+}
+
+/* ---------- people walking the rider-flow lanes ---------- */
+const shirt = ['#c8202f','#16187a','#ffc928','#1fae4a','#ff7a1d','#3db2f0','#ffffff','#7c3aed','#0f766e'];
+const skin = ['#8d5a3b','#c68b5e','#e0b08a','#6b4429'];
+const ROUTES = [
+  mkPath([[1075,915],[1022,890],[1000,850],[1000,795],[945,795],[945,443],[688,443],[684,300],[640,290]]),
+  mkPath([[1075,915],[1022,890],[1000,850],[1000,795],[945,795],[945,587],[798,587],[798,682],[695,682],[688,682],[688,765],[572,765],[572,587],[688,587],[688,443],[684,300],[620,280]]),
+  mkPath([[1075,915],[1022,890],[1000,850],[1000,795],[945,795],[945,587],[798,587],[798,682],[800,742],[858,742],[858,830],[645,830],[645,880],[617,905],[600,965]])
+];
+function makePerson(){
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(.17, .2, .75, 8), new THREE.MeshStandardMaterial({color:col(shirt[Math.random() * shirt.length | 0])}));
+  body.position.y = .78; g.add(body);
+  const legs = new THREE.Mesh(new THREE.CylinderGeometry(.16, .14, .45, 8), new THREE.MeshStandardMaterial({color:col('#23263a')}));
+  legs.position.y = .22; g.add(legs);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(.15, 10, 8), new THREE.MeshStandardMaterial({color:col(skin[Math.random() * skin.length | 0])}));
+  head.position.y = 1.3; g.add(head);
+  g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  return g;
+}
+const walkers = [];
+for (let i = 0; i < 42; i++){
+  const r = ROUTES[i % 3], w = makePerson();
+  w.userData = {r, d:Math.random() * r.len, v:.9 + Math.random() * .6, off:(Math.random() - .5) * 1.0, ph:Math.random() * 6};
+  scene.add(w); walkers.push(w);
+}
+
+/* ---------- riders: waves leave standby, ride from START, cross FINISH ---------- */
+function makeCyclist(){
+  const g = new THREE.Group();
+  const tire = new THREE.MeshStandardMaterial({color:col('#111218'), roughness:.6});
+  const wheels = [];
+  [-.45, .45].forEach(x => { const w = new THREE.Mesh(new THREE.TorusGeometry(.32, .05, 6, 16), tire); w.position.set(x, .37, 0); g.add(w); wheels.push(w); });
+  const frame = new THREE.Mesh(new THREE.BoxGeometry(.9, .07, .07), new THREE.MeshStandardMaterial({color:col(['#c8202f','#16187a','#ffc928','#e8eaf2'][Math.random() * 4 | 0])}));
+  frame.position.y = .6; g.add(frame);
+  const jersey = new THREE.Mesh(new THREE.BoxGeometry(.5, .55, .32), new THREE.MeshStandardMaterial({color:col(shirt[Math.random() * shirt.length | 0])}));
+  jersey.position.set(-.05, 1.0, 0); jersey.rotation.z = -.6; g.add(jersey);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(.16, 10, 8), new THREE.MeshStandardMaterial({color:col(['#ffffff','#16187a','#c8202f','#111'][Math.random() * 4 | 0])}));
+  head.position.set(.22, 1.3, 0); g.add(head);
+  g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  g.userData.wheels = wheels;
+  return g;
+}
+const SLOTS = [];
+for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) SLOTS.push([510 + c * 36, 225 + r * 30]);
+// finish corral on Independence Road, between the FINISH arch and the BYD Garage (7 x 3 bikes)
+const PARK = [];
+for (let c = 0; c < 7; c++) for (let r = 0; r < 3; r++) PARK.push([955 - c * 20, 940 + r * 15]);
+const parked = []; // queue of parked riders, oldest first
+// start grid on Roxas Boulevard, just behind the START arch (4 x 3), riders face the arch
+const GRID = [];
+for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) GRID.push([915 + c * 20, 50 + r * 15]);
+function rideRoute(slot, g){
+  return mkPath([slot, [665, slot[1]], [676, 262], [676, 150], [700, 150], [1005, 150], [1010, 92], [1010, g[1]], [g[0] + 15, g[1]], g]);
+}
+function parkAt(c, slot){
+  const u = c.userData;
+  Object.assign(u, {state:'parked', park:slot});
+  c.position.set(X(slot[0]), 0, Z(slot[1]));
+  c.rotation.y = 0;                       // facing east, toward the BYD Test Drive
+  c.visible = true; parked.push(c);
+}
+function freePark(){
+  const used = new Set(riders.filter(c => c.userData.state === 'parked' || c.userData.state === 'ride').map(c => c.userData.park));
+  let s = PARK.find(p => !used.has(p));
+  if (!s){ const old = parked.shift(); if (!old) return PARK[Math.random() * PARK.length | 0]; s = old.userData.park; old.userData.state = 'idle'; old.visible = false; }
+  return s;
+}
+const riders = [];
+for (let i = 0; i < 72; i++){ const c = makeCyclist(); c.visible = false; c.userData.state = 'idle'; scene.add(c); riders.push(c); }
+for (let i = 0; i < 15; i++) parkAt(riders[i], PARK[i]);
+let waveNo = 0, finished = 0, waveTimer = 0;
+const WAVE_EVERY = 24;
+function fillStandby(){
+  let n = 0;
+  for (const c of riders){
+    if (n >= SLOTS.length) break;
+    if (c.userData.state !== 'idle') continue;
+    const s = SLOTS[n++];
+    Object.assign(c.userData, {state:'wait', slot:s, route:null, d:0, delay:0, counted:false});
+    c.position.set(X(s[0]) + (Math.random() - .5) * .6, 0, Z(s[1]) + (Math.random() - .5) * .6);
+    c.rotation.y = 0; c.visible = true;
+  }
+}
+function releaseWave(){
+  waveNo++;
+  // the wave already at the start has gone off; make room for the new one
+  riders.forEach(c => { if (c.userData.state === 'start'){ c.userData.state = 'idle'; c.visible = false; } });
+  let k = 0;
+  riders.forEach(c => { if (c.userData.state === 'wait'){ const u = c.userData; u.grid = GRID[k % GRID.length]; u.state = 'ride'; u.route = rideRoute(u.slot, u.grid); u.d = 0; u.delay = k++ * .55; u.v = 7 + Math.random() * 1.5; u.lane = 0; } });
+  toast(`Wave ${waveNo} heading to the start`);
+  setTimeout(fillStandby, 4000);
+}
+fillStandby();
+
+/* ---------- selection ring ---------- */
+const ring = new THREE.Mesh(new THREE.RingGeometry(1, 1.18, 48), new THREE.MeshBasicMaterial({color:col('#ffc928'), transparent:true, opacity:.95, depthWrite:false}));
+ring.rotation.x = -Math.PI / 2; ring.position.y = .07; ring.visible = false; ring.renderOrder = 3; scene.add(ring);
+let selected = null;
+function itemCenter(it){ return new V3(X(it.x), 0, Z(it.y)); }
+function itemTop(it){ const h = it.kind === 'arch' ? it.h / S / 2 + 1.2 : it.kind === 'wall' ? 2.6 : it.kind === 'stage' ? it.ht + 4 : it.kind === 'gate' ? 3.1 : it.kind === 'restricted' ? .4 : it.id === 'grandstand' ? 1.9 : (it.top || it.ht || 2.2); return itemCenter(it).setY(h + .5); }
+function select(it){
+  selected = it;
+  if (!it){ ring.visible = false; infoEl.hidden = true; renderDirOn(); return; }
+  ring.visible = true; ring.position.x = X(it.x); ring.position.z = Z(it.y);
+  const rr = Math.min(10, Math.max(it.w, it.h) / S * .62 + .6); ring.scale.setScalar(rr);
+  infoEl.hidden = false;
+  document.getElementById('iSw').style.background = CATS[it.cat].bg;
+  document.getElementById('iCat').textContent = CATS[it.cat].name;
+  document.getElementById('iName').textContent = it.name;
+  document.getElementById('iDesc').textContent = it.desc;
+  const sizeEl = document.getElementById('iSize');
+  sizeEl.hidden = !it.sz;
+  if (it.sz){ document.getElementById('iSzV').textContent = it.sz; document.getElementById('iType').textContent = it.tent ? TENT[it.tent] : ''; }
+  renderDirOn();
+}
+
+/* ---------- camera flights ---------- */
+let fly = null;
+function viewFor(target, az, el, dist){
+  return {tgt:target.clone(), pos:new V3(target.x + dist * Math.cos(el) * Math.sin(az), target.y + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az))};
+}
+function flyTo(v, dur){
+  fly = {fp:camera.position.clone(), ft:controls.target.clone(), tp:v.pos, tt:v.tgt, t:0, dur:reduced ? .01 : (dur || 2.2)};
+}
+function centroid(ids){
+  const c = new V3(); ids.forEach(id => c.add(itemCenter(BY[id]))); return c.multiplyScalar(1 / ids.length);
+}
+function stopView(s){
+  const tgt = s.target ? new V3(X(s.target[0]), 0, Z(s.target[1])) : centroid(s.ids);
+  let dist = s.dist;
+  if (innerWidth < 820) dist *= 1.35;
+  return viewFor(tgt, s.az, s.el, dist);
+}
+function flyToItem(it){
+  const off = camera.position.clone().sub(controls.target);
+  const az = Math.atan2(off.x, off.z);
+  const size = Math.max(it.w, it.h) / S;
+  flyTo(viewFor(itemCenter(it), az, .6, Math.max(14, size * 2.4) * (innerWidth < 820 ? 1.3 : 1)), 1.6);
+}
+
+/* ---------- UI ---------- */
+const $ = id => document.getElementById(id);
+const infoEl = $('info');
+const bar = {kick:$('bKick'), count:$('bCount'), title:$('bTitle'), text:$('bText'), prog:$('bProg').firstElementChild, ctrls:$('bCtrls'), progWrap:$('bProg')};
+let mode = 'tour', stop = 0, playing = !reduced, dwell = 0;
+const DWELL = 9;
+const dotsEl = $('dots');
+TOUR.forEach((s, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', `Stop ${i + 1}: ${s.t}`); b.onclick = () => { goStop(i); }; dotsEl.appendChild(b); });
+let focusIds = [];
+function goStop(i){
+  setMode('tour', true);
+  stop = (i + TOUR.length) % TOUR.length; dwell = 0;
+  const s = TOUR[stop];
+  bar.kick.textContent = s.k; bar.count.textContent = `Stop ${stop + 1} of ${TOUR.length}`;
+  bar.title.textContent = s.t; bar.text.textContent = s.d;
+  [...dotsEl.children].forEach((b, j) => b.classList.toggle('on', j === stop));
+  focusIds = s.ids.slice();
+  select(null);
+  flyTo(stopView(s));
+}
+function setPlaying(p){ playing = p; $('play').textContent = p ? 'Pause tour' : 'Play tour'; }
+$('prev').onclick = () => goStop(stop - 1);
+$('next').onclick = () => goStop(stop + 1);
+$('play').onclick = () => { setPlaying(!playing); if (playing) dwell = 0; };
+
+function setMode(m, silent){
+  mode = m;
+  ['mTour','mWalk','mFree','mTop'].forEach(id => $(id).setAttribute('aria-pressed', 'false'));
+  $({tour:'mTour', walk:'mWalk', free:'mFree', top:'mTop'}[m]).setAttribute('aria-pressed', 'true');
+  controls.enabled = m !== 'walk';
+  const tourUI = m === 'tour';
+  bar.ctrls.hidden = !tourUI; bar.progWrap.hidden = !tourUI;
+  if (silent) return;
+  focusIds = [];
+  if (m === 'tour'){ setPlaying(!reduced); goStop(stop); }
+  if (m === 'free'){
+    bar.kick.textContent = 'Explore freely'; bar.count.textContent = '';
+    bar.title.textContent = 'Look around the village';
+    bar.text.textContent = 'Drag to orbit, right-drag or two fingers to pan, scroll or pinch to zoom. Tap any booth to see what it is, or pick one from the booth list.';
+  }
+  if (m === 'top'){
+    bar.kick.textContent = 'Top view'; bar.count.textContent = '';
+    bar.title.textContent = 'The site map in 3D';
+    bar.text.textContent = 'Same layout as the printed site map: Roxas Boulevard at the top, Independence Road at the bottom. Drag to tilt back into 3D.';
+    flyTo({pos:new V3(0, innerWidth < 820 ? 200 : 132, .1), tgt:new V3(0, 0, 0)}, 2);
+  }
+  if (m === 'walk'){
+    walkD = 0; select(null);
+    bar.kick.textContent = 'Walk the lanes'; bar.count.textContent = '';
+    bar.title.textContent = 'Entering from Independence Road';
+    bar.text.textContent = 'You are walking the red rider-flow lanes at eye level, from the Entrance through the booths to the Exit.';
+  }
+}
+$('mTour').onclick = () => setMode('tour');
+$('mWalk').onclick = () => setMode('walk');
+$('mFree').onclick = () => setMode('free');
+$('mTop').onclick = () => setMode('top');
+let simOn = true;
+$('mSim').onclick = () => { simOn = !simOn; $('mSim').setAttribute('aria-pressed', simOn); $('mSim').textContent = simOn ? 'Simulation on' : 'Simulation off'; };
+$('dirToggle').onclick = () => { const o = $('dir').classList.toggle('open'); $('dirToggle').setAttribute('aria-pressed', o); };
+$('infoX').onclick = () => select(null);
+
+// directory
+const listEl = $('list');
+const ORDER = ['stage','sponsor','tent','byd','dot','ops','merch','standby','start','cardinal','restricted','landmark'];
+function renderDir(q){
+  q = (q || '').trim().toLowerCase();
+  listEl.innerHTML = '';
+  ORDER.forEach(cat => {
+    const items = ITEMS.filter(it => it.cat === cat && (!q || it.name.toLowerCase().includes(q) || CATS[cat].name.toLowerCase().includes(q)));
+    if (!items.length) return;
+    const g = document.createElement('div'); g.className = 'grp';
+    g.innerHTML = `<h3><span class="sw" style="background:${CATS[cat].bg}"></span>${CATS[cat].name}<small style="margin-left:auto;font:500 11px var(--body);color:var(--muted)">${items.length}</small></h3>`;
+    items.forEach(it => {
+      const b = document.createElement('button'); b.textContent = it.name; b.dataset.id = it.id;
+      if (it.ft || it.sz === 'To follow'){ const sm = document.createElement('small'); sm.textContent = it.ft ? `${fmtFt(it.ft[0])}×${fmtFt(it.ft[1])} ft` : 'size TBA'; b.appendChild(sm); }
+      b.onclick = () => { if (mode === 'walk' || mode === 'tour') setMode('free'); select(it); flyToItem(it); $('dir').classList.remove('open'); };
+      g.appendChild(b);
+    });
+    listEl.appendChild(g);
+  });
+  renderDirOn();
+}
+function renderDirOn(){ listEl.querySelectorAll('button').forEach(b => b.classList.toggle('on', !!selected && b.dataset.id === selected.id)); }
+$('q').addEventListener('input', e => renderDir(e.target.value));
+renderDir('');
+
+// toast
+let toastT;
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
+
+// clock (Manila time)
+function tick(){ try { $('clock').textContent = new Intl.DateTimeFormat('en-PH', {hour:'2-digit', minute:'2-digit', timeZone:'Asia/Manila'}).format(new Date()) + ' PHT'; } catch(e){} }
+tick(); setInterval(tick, 15000);
+
+/* ---------- picking ---------- */
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+let hoverIt = null, downAt = null;
+function pick(e){
+  const r = canvas.getBoundingClientRect();
+  ndc.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(pickables, false)[0];
+  return hit ? hit.object.userData.item : null;
+}
+canvas.addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse' || mode === 'walk') return;
+  hoverIt = pick(e); canvas.classList.toggle('hovering', !!hoverIt);
+});
+canvas.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; if (mode === 'tour') setPlaying(false); fly = null; });
+canvas.addEventListener('pointerup', e => {
+  if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6 || mode === 'walk') return;
+  const it = pick(e);
+  if (it){ select(it); flyToItem(it); } else select(null);
+});
+canvas.addEventListener('wheel', () => { fly = null; if (mode === 'tour') setPlaying(false); }, {passive:true});
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight') goStop(stop + 1);
+  if (e.key === 'ArrowLeft') goStop(stop - 1);
+  if (e.key === 'Escape') select(null);
+});
+
+/* ---------- floating name tags ---------- */
+const tagsEl = $('tags'), tagPool = {};
+function tagFor(it){ let t = tagPool[it.id]; if (!t){ t = document.createElement('div'); t.className = 'tag'; t.textContent = it.name; tagsEl.appendChild(t); tagPool[it.id] = t; } return t; }
+const tmp = new V3();
+function updateTags(){
+  const show = new Set(focusIds);
+  if (selected) show.add(selected.id);
+  if (hoverIt) show.add(hoverIt.id);
+  if (mode === 'walk' && nearIt) show.add(nearIt.id);
+  const r = canvas.getBoundingClientRect();
+  for (const id in tagPool) if (!show.has(id)) tagPool[id].style.display = 'none';
+  show.forEach(id => {
+    const it = BY[id]; const t = tagFor(it);
+    tmp.copy(itemTop(it)).project(camera);
+    if (tmp.z > 1 || Math.abs(tmp.x) > 1.1 || Math.abs(tmp.y) > 1.1){ t.style.display = 'none'; return; }
+    t.style.display = 'block';
+    t.classList.toggle('hover', hoverIt === it || selected === it);
+    t.style.transform = `translate(${(tmp.x + 1) / 2 * r.width}px, ${(1 - tmp.y) / 2 * r.height}px) translate(-50%, -100%)`;
+  });
+}
+
+/* ---------- walk mode ---------- */
+const WALK = mkPath([[1075,915],[1022,890],[1000,850],[1000,795],[945,795],[945,600],[945,450],[870,450],[700,450],[688,460],[688,587],[580,587],[572,600],[572,765],[590,830],[645,830],[645,880],[617,905],[600,975]]);
+let walkD = 0, nearIt = null;
+const wp = new V3(), wl = new V3(), wlook = new V3(0, 1.6, 0);
+function nearestBooth(p){
+  let best = null, bd = 7.5;
+  ITEMS.forEach(it => { if (it.cat === 'landmark' && it.kind !== 'gate') return; const d = Math.hypot(X(it.x) - p.x, Z(it.y) - p.z) - Math.max(it.w, it.h) / S * .3; if (d < bd){ bd = d; best = it; } });
+  return best;
+}
+
+/* ---------- resize ---------- */
+function resize(){
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+
+/* ---------- loop ---------- */
+const clock = new THREE.Clock();
+const pv = new V3(), dv = new V3();
+let statT = 0;
+function frame(){
+  const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
+
+  if (simOn){
+    // walkers
+    walkers.forEach(w => {
+      const u = w.userData; u.d += u.v * dt;
+      if (u.d > u.r.len){ u.d = 0; }
+      u.r.at(u.d, pv, dv);
+      w.position.set(pv.x - dv.z * u.off, Math.abs(Math.sin(t * 7 + u.ph)) * .06, pv.z + dv.x * u.off);
+      w.rotation.y = Math.atan2(dv.x, dv.z);
+    });
+    // waves
+    waveTimer += dt;
+    if (waveTimer > (waveNo === 0 ? 5 : WAVE_EVERY)){ waveTimer = 0; releaseWave(); }
+    riders.forEach(c => {
+      const u = c.userData;
+      if (u.state !== 'ride') return;
+      if (u.delay > 0){ u.delay -= dt; return; }
+      u.d += u.v * dt;
+      if (u.d >= u.route.len){ u.state = 'start'; c.position.set(X(u.grid[0]), 0, Z(u.grid[1])); c.rotation.y = Math.PI; return; }
+      u.route.at(u.d, pv, dv);
+      c.position.set(pv.x, 0, pv.z);
+      c.rotation.y = Math.atan2(-dv.z, dv.x);
+      u.wheels.forEach(wh => wh.rotation.z -= u.v * dt / .32);
+    });
+    trees.forEach(tr => { tr.rotation.z = Math.sin(t * .8 + tr.userData.seed) * .015; });
+  }
+
+  statT += dt;
+  if (statT > .5){
+    statT = 0;
+    const moving = riders.filter(c => c.userData.state === 'ride').length;
+    const atStart = riders.filter(c => c.userData.state === 'start').length;
+    $('stats').textContent = waveNo ? (moving ? `Wave ${waveNo} riding to the start` : `Wave ${waveNo} at the start · ${atStart} riders`) : 'Wave 1 lining up';
+  }
+
+  // camera
+  if (mode === 'walk'){
+    walkD += 2.4 * dt;
+    if (walkD > WALK.len) walkD = 0;
+    WALK.at(walkD, wp, dv); WALK.at(walkD + 4, wl);
+    camera.position.lerp(wp.setY(1.7), walkD < .1 ? 1 : .2);
+    wlook.lerp(wl.setY(1.4), .06);
+    camera.lookAt(wlook);
+    const n = nearestBooth(camera.position);
+    if (n !== nearIt){ nearIt = n; if (n){ bar.title.textContent = 'Now passing: ' + n.name; bar.text.textContent = n.desc; } }
+  } else {
+    if (fly){
+      fly.t += dt / fly.dur;
+      const k = fly.t >= 1 ? 1 : (fly.t < .5 ? 4 * fly.t ** 3 : 1 - (-2 * fly.t + 2) ** 3 / 2);
+      camera.position.lerpVectors(fly.fp, fly.tp, k);
+      controls.target.lerpVectors(fly.ft, fly.tt, k);
+      if (fly.t >= 1) fly = null;
+    } else if (mode === 'tour' && playing){
+      dwell += dt;
+      bar.prog.style.width = Math.min(100, dwell / DWELL * 100) + '%';
+      if (!reduced){ // slow drift around the stop
+        const off = camera.position.clone().sub(controls.target);
+        off.applyAxisAngle(new V3(0, 1, 0), dt * .04);
+        camera.position.copy(controls.target).add(off);
+      }
+      if (dwell > DWELL) goStop(stop + 1);
+    }
+    if (!(mode === 'tour' && playing)) bar.prog.style.width = mode === 'tour' ? Math.min(100, dwell / DWELL * 100) + '%' : '0';
+    controls.update();
+  }
+
+  if (ring.visible){ ring.material.opacity = .7 + Math.sin(t * 4) * .25; ring.rotation.z = t * .3; }
+
+  renderer.render(scene, camera);
+  updateTags();
+  requestAnimationFrame(frame);
+}
+
+/* ---------- start once fonts are ready (labels are drawn with Oswald) ---------- */
+function start(){
+  $('loading').classList.add('done');
+  setMode('tour', true); goStop(0); setPlaying(!reduced);
+  requestAnimationFrame(frame);
+}
+start();
+}
+(function(){
+  let done = false; const go = () => { if (!done){ done = true; boot(); } };
+  try { Promise.all([document.fonts.load('700 40px Oswald'), document.fonts.load('500 14px Oswald')]).then(go, go); } catch(e){ go(); }
+  setTimeout(go, 2500);
+})();
+</script>
+
+</body></html>
