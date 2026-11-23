@@ -273,9 +273,6 @@ const svgSite = `<svg viewBox="80 -5 1225 1095" xmlns="http://www.w3.org/2000/sv
 ${base(false)}
 ${features(false)}
 ${booths(false, true)}
-<rect x="566" y="330" width="560" height="0" />
-<rect x="352" y="340" width="725" height="580" fill="none" stroke="#c8202f" stroke-width="3" stroke-dasharray="10 6"/>
-<text x="360" y="332" font-family="${FONT}" font-weight="700" font-size="14" fill="#c8202f">BIKE VILLAGE</text>
 ${northArrow(1275, 140, 1.4)}
 </svg>`;
 
@@ -358,7 +355,7 @@ tfoot td{background:#16187a;color:#fff;font-weight:700}
     <div class="title">
       <div class="eyebrow">FunRide PH · Rizal Park, Manila</div>
       <h1>Site<br>Overview</h1>
-      <p>Whole event site from KM 0 on Roxas Boulevard to the finish on Independence Road. The dashed red box is the Bike Village; the red dotted lines are the rider / guest flow lanes.</p>
+      <p>Whole event site from KM 0 on Roxas Boulevard to the finish on Independence Road. The red dotted lines are the rider / guest flow lanes.</p>
       <div class="stripe"><i></i><i></i><i></i></div>
     </div>
     <div class="box">
