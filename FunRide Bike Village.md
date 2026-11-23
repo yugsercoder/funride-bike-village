@@ -14,7 +14,7 @@ The village sits on the lawn between **Roxas Boulevard** (north) and **Independe
 4. **Bikes and Coffee & Photowall.** Bikes and Coffee is in the northeast corner. Along the top of the queue lanes are the three photowalls: 21 KM, 10 KM and 5 KM.
 5. **Sponsor blocks, north.** The red rider-flow lanes split the floor into blocks. The north blocks hold the DOT Booth, Dr. O, Oxecure, Neutra K and Wert PH.
 6. **Sponsor blocks, south.** BDO, Specialign, Fitbar, Cargo Boss, Popcycle, Gatorade, Pepsi and Espace Wellness.
-7. **AC Health, AC Mobility & BYD Showroom.** The southwest block holds AC Health / AC Mobility with the BYD Showroom right below it.
+7. **AC Health, AC Mobility & BYD Showroom.** The southwest block holds two separate big booths: AC Health / AC Mobility, and just below it across a walkway, the BYD Showroom.
 8. **Merchants.** Two rows of merchant booths near the exit: Sugar High and Swiss Proli & Take Out, plus 8 open merchant slots.
 9. **Stage & Tech.** The stage faces the floor from the west, with Tech to its north. Myriad and ARF sit beside the stage, and Smoke10 is just above Tech.
 10. **Tents along the west fence.** Three tents line the west fence: BYD, DOT, and Artists & Other Sponsors. VIP Portalets stand just outside the fence.
@@ -41,7 +41,8 @@ Booths in the 3D model and in `FunRide Bike Village - Layout Plan.pdf` are drawn
 | Open tent | Tech | 10 × 20 |
 | Booth stall only | Espace Wellness | 5 × 5 |
 | Big booth | DOT | 10 × 20 |
-| Big booth | BYD Showroom / AC Health / AC Mobility | 32 × 49 |
+| Big booth | AC Health / AC Mobility | 24.5 × 32 |
+| Big booth | BYD Showroom | 24.5 × 32 |
 | Aircon tent (VIP) | Artists & Other Sponsors | 12 × 24 |
 | Aircon tent (VIP) | DOT, BYD | 12 × 12 |
 | Merchants | 10 booths | 10 × 10 each |
@@ -96,10 +97,10 @@ Booths in the 3D model and in `FunRide Bike Village - Layout Plan.pdf` are drawn
 | Booth | Location |
 |---|---|
 | AC Health / AC Mobility | Southwest block |
-| BYD Showroom | Directly below AC Health / AC Mobility |
+| BYD Showroom | Separate booth just below AC Health / AC Mobility, across a walkway |
 | BYD Test Drive Registration | Just outside the Entrance; sign up here for the test drive |
 | BYD Garage | Independence Road, beside the BYD Test Drive |
-| BYD Test Drive | Independence Road, by South Drive |
+| BYD Test Drive | Independence Road, ending at the South Drive corner (does not extend past it) |
 | Artists Entrance | Separate entrance for artists, with a path up to the west fence |
 
 ### Operations

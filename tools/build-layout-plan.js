@@ -169,13 +169,13 @@ const SHARED = [
 const sharedIds = new Set(SHARED.flatMap(g => g.ids));
 function sizeLine(it) {
   if (sharedIds.has(it.id)) return '';
-  if (it.id === 'ac' || it.id === 'byd-showroom') return '';
   if (it.tent === 'stage') return `${f1(it.ft[1])} × ${f1(it.ft[0])} FT · 3 FT H`;
   // write as the short side first, like the booking sheet
   const [a, b] = [it.ft[0], it.ft[1]].sort((p, q) => p - q);
   return `${f1(a)} × ${f1(b)} FT`;
 }
-function booths(detail) {
+// detail: names + sizes + dimension lines; names: names + sizes only (site overview)
+function booths(detail, names) {
   const s = [];
   ITEMS.filter(it => it.ft).forEach(it => {
     const T = TYPE[typeOf(it)];
@@ -194,7 +194,7 @@ function booths(detail) {
       const ax = b === 'w' ? x - 5 : b === 'e' ? x + it.w + 1 : it.x - 4, ay = b === 'n' ? y - 5 : b === 's' ? y + it.h + 1 : it.y - 4;
       g += `<rect x="${ax}" y="${ay}" width="${b === 'w' || b === 'e' ? 4 : 8}" height="${b === 'w' || b === 'e' ? 8 : 4}" fill="#8f96a8"/>`;
     }
-    if (detail) {
+    if (detail || names) {
       let name = it.label != null && it.label !== '' ? it.label : it.name.toUpperCase();
       if (it.cat === 'merch' && !it.label) name = 'MERCHANT\n' + it.name.replace(/\D/g, '');
       name = name.replace(/REGIS-\nTRATION/, 'REGISTRATION');
@@ -218,11 +218,12 @@ function booths(detail) {
       else s.push(`<text x="${x2 + 3}" y="${(y1 + y2) / 2}" text-anchor="start" dominant-baseline="central" font-family="${FONT}" font-weight="700" font-size="4.6" fill="#16183f"><tspan x="${x2 + 3}" dy="-3">SHARED</tspan><tspan x="${x2 + 3}" dy="5.6">10 × 10 FT</tspan></text>`);
     });
     // dimension lines on the big booths and stage
-    const ac = BY['ac'], bs = BY['byd-showroom'];
-    const bx1 = ac.x - ac.w / 2, bx2 = ac.x + ac.w / 2, by1 = ac.y - ac.h / 2, by2 = bs.y + bs.h / 2;
-    s.push(`<rect x="${bx1}" y="${by1}" width="${bx2 - bx1}" height="${by2 - by1}" fill="none" stroke="#16183f" stroke-width="1.8"/>`);
-    s.push(dim(bx1, by1 - 7, bx2, by1 - 7, '32 FT'));
-    s.push(dimV(bx1 - 7, by1, bx1 - 7, by2, '49 FT'));
+    // AC Health / AC Mobility and BYD Showroom are two separate 32 x 24.5 ft booths
+    ['ac', 'byd-showroom'].forEach(id => {
+      const b = BY[id], bx1 = b.x - b.w / 2, bx2 = b.x + b.w / 2, by1 = b.y - b.h / 2, by2 = b.y + b.h / 2;
+      if (id === 'ac') s.push(dim(bx1, by1 - 5, bx2, by1 - 5, '32 FT'));
+      s.push(dimV(bx1 - 5, by1, bx1 - 5, by2, '24.5 FT'));
+    });
     const st = BY['stage'];
     s.push(dimV(st.x + st.w / 2 + 7, st.y - st.h / 2, st.x + st.w / 2 + 7, st.y + st.h / 2, '20 FT'));
     const kc = BY['kit'];
@@ -271,10 +272,10 @@ ${scaleBar(338, 910)}
 const svgSite = `<svg viewBox="80 -5 1225 1095" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
 ${base(false)}
 ${features(false)}
-${booths(false)}
+${booths(false, true)}
 <rect x="566" y="330" width="560" height="0" />
 <rect x="352" y="340" width="725" height="580" fill="none" stroke="#c8202f" stroke-width="3" stroke-dasharray="10 6"/>
-<text x="360" y="332" font-family="${FONT}" font-weight="700" font-size="14" fill="#c8202f">BIKE VILLAGE · SEE PAGE 1</text>
+<text x="360" y="332" font-family="${FONT}" font-weight="700" font-size="14" fill="#c8202f">BIKE VILLAGE</text>
 ${northArrow(1275, 140, 1.4)}
 </svg>`;
 
@@ -290,7 +291,7 @@ const SCHEDULE = [
     ['Dr. O / Oxecure (shared)', '10 × 15', 1], ['Myriad', '10 × 10', 1], ['ARF', '10 × 10', 1], ['Smoke10', '10 × 10', 1],
     ['Tech', '10 × 20', 1], ['Bike Check Station', '10 × 10', 1], ['BYD Test Drive Registration', '10 × 10', 1]]],
   ['Big booths', 'big', [
-    ['DOT', '10 × 20', 1], ['BYD Showroom / AC Health / AC Mobility', '32 × 49', 1]]],
+    ['DOT', '10 × 20', 1], ['AC Health / AC Mobility', '24.5 × 32', 1], ['BYD Showroom', '24.5 × 32', 1]]],
   ['Aircon tents (VIPs)', 'aircon', [
     ['Artists & other sponsors', '12 × 24', 1], ['DOT', '12 × 12', 1], ['BYD', '12 × 12', 1]]],
   ['Merchants', 'merch', [['Merchant booth', '10 × 10', 10]]],
@@ -352,53 +353,12 @@ tfoot td{background:#16187a;color:#fff;font-weight:700}
 </style></head><body>
 
 <section class="page">
-  <div class="plan">${svgDetail}</div>
-  <aside>
-    <div class="title">
-      <div class="eyebrow">FunRide PH · Rizal Park, Manila</div>
-      <h1>Bike Village<br>Layout Plan</h1>
-      <p>Booths drawn to true size (1 grid square = 10 × 10 ft). Roads and surroundings are approximate.</p>
-      <div class="stripe"><i></i><i></i><i></i></div>
-    </div>
-    <div class="box">
-      <h2>Booth type</h2>
-      <ul>${legendRows}
-        <li><span class="sw" style="background:#fff;border:.3mm dashed #23219c"></span>Photowall (size to follow)</li>
-      </ul>
-    </div>
-    <div class="box">
-      <h2>Plan symbols</h2>
-      <ul>
-        <li><span class="sw" style="background:#23219c;border-left:1.4mm solid #ffc928"></span>Yellow edge = back siding</li>
-        <li><span class="sw" style="background:#3db2f0;position:relative"></span>Grey block = aircon unit</li>
-        <li><span class="ln"></span>Rider / guest flow lane</li>
-        <li><span class="ln" style="border-top:.9mm solid #1b1e4a"></span>Fence</li>
-        <li><span class="ln" style="border-top:1.6mm solid #4f9a3a"></span>Hedge</li>
-        <li><span class="ln" style="border-top:.7mm dotted #1b1e4a"></span>Barrier (ops column)</li>
-      </ul>
-    </div>
-    <div class="box">
-      <h2>Notes</h2>
-      <ol class="notes">
-        <li>Ops column (EMS to Baggage) faces the guest lane; back sidings run along the barrier.</li>
-        <li>Dr. O / Oxecure share one 10 × 15 ft tent; Gatorade / Pepsi share one 10 × 10 ft tent.</li>
-        <li>BYD Showroom / AC Health / AC Mobility is one 32 × 49 ft big booth.</li>
-        <li>Espace Wellness is a 5 × 5 ft booth stall only (no tent).</li>
-        <li>Main Stage 20 × 12 ft, 3 ft high. Satellite Stage at KM 0 is on page 2.</li>
-        <li>Photowall sizes to follow.</li>
-      </ol>
-    </div>
-    <div class="foot"><span>Page 1 of 3 · Bike Village</span><span>${today}</span></div>
-  </aside>
-</section>
-
-<section class="page">
   <div class="plan">${svgSite}</div>
   <aside>
     <div class="title">
       <div class="eyebrow">FunRide PH · Rizal Park, Manila</div>
       <h1>Site<br>Overview</h1>
-      <p>Whole event site from KM 0 on Roxas Boulevard to the finish on Independence Road. The dashed red box is the Bike Village on page 1.</p>
+      <p>Whole event site from KM 0 on Roxas Boulevard to the finish on Independence Road. The dashed red box is the Bike Village; the red dotted lines are the rider / guest flow lanes.</p>
       <div class="stripe"><i></i><i></i><i></i></div>
     </div>
     <div class="box">
@@ -412,44 +372,16 @@ tfoot td{background:#16187a;color:#fff;font-weight:700}
         <li><b>Standby per Wave</b> feeds Exit to Start and the ramp up to KM 0.</li>
         <li><b>Entrance</b> southeast corner, <b>Exit</b> southwest corner.</li>
         <li><b>Finish</b> on Independence Road, beside BYD Garage and BYD Test Drive.</li>
+        <li><b>BYD Test Drive</b> stays on Independence Road and stops at the South Drive corner.</li>
+        <li><b>AC Health / AC Mobility</b> and <b>BYD Showroom</b> are two separate 24.5 × 32 ft big booths.</li>
         <li>Artists come in through the Artists Entrance and follow the path to the aircon tents.</li>
       </ol>
     </div>
-    <div class="foot"><span>Page 2 of 3 · Site overview</span><span>${today}</span></div>
+    <div class="foot"><span>Site overview</span><span>${today}</span></div>
   </aside>
 </section>
-
-<section class="page sched">
-  <div class="col">
-    <div class="title">
-      <div class="eyebrow">FunRide PH · Bike Village</div>
-      <h1>Booth Size Schedule</h1>
-      <p>Every booth with its booked size, count and floor area. Sizes in feet (width × length).</p>
-      <div class="stripe"><i></i><i></i><i></i></div>
-    </div>
-    <div class="kpis">
-      <div class="kpi"><b>${SCHEDULE.flatMap(g => g[2]).filter(r => r[1] !== 'to follow').reduce((a, r) => a + r[2], 0)}</b><span>booths, tents and stages with a size</span></div>
-      <div class="kpi"><b>${grandArea.toLocaleString('en-US')} sq ft</b><span>total footprint (≈ ${Math.round(grandArea * 0.092903).toLocaleString('en-US')} m²)</span></div>
-    </div>
-    <table>
-      <thead><tr><th>Booth</th><th class="n">Size (ft)</th><th class="n">Qty</th><th class="n">Each sq ft</th><th class="n">Total sq ft</th></tr></thead>
-      <tbody>${schedRows.split('<tr class="grp"><th colspan="5">Big booths')[0]}</tbody>
-    </table>
-  </div>
-  <div class="col">
-    <table>
-      <thead><tr><th>Booth</th><th class="n">Size (ft)</th><th class="n">Qty</th><th class="n">Each sq ft</th><th class="n">Total sq ft</th></tr></thead>
-      <tbody>${'<tr class="grp"><th colspan="5">Big booths' + schedRows.split('<tr class="grp"><th colspan="5">Big booths')[1]}</tbody>
-      <tfoot><tr><td>Grand total</td><td></td><td class="n">${grandQty}</td><td></td><td class="n">${grandArea.toLocaleString('en-US')}</td></tr></tfoot>
-    </table>
-    <div class="box">
-      <h2>Booth type</h2>
-      <ul style="grid-template-columns:1fr 1fr">${legendRows}</ul>
-    </div>
-    <div class="foot"><span>Page 3 of 3 · Size schedule</span><span>${today}</span></div>
-  </div>
-</section>
 </body></html>`;
+
 
 fs.writeFileSync(OUT_HTML, html);
 console.log('wrote', OUT_HTML);
