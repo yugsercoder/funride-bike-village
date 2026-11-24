@@ -1,5 +1,5 @@
 // Builds the 2D Bike Village layout plan (HTML -> PDF + PNG) from the booth data in
-// "FunRide Bike Village.html", so the printed plan always matches the 3D simulation.
+// village/js/data.js (used by "FunRide Bike Village.html"), so the printed plan always matches the 3D simulation.
 //   node tools/build-layout-plan.js
 'use strict';
 const fs = require('fs');
@@ -7,7 +7,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
-const SRC = path.join(ROOT, 'FunRide Bike Village.html');
+const SRC = path.join(ROOT, 'village', 'js', 'data.js');
 const OUT_HTML = path.join(__dirname, 'layout-plan.html');
 const OUT_PDF = path.join(ROOT, 'FunRide Bike Village - Layout Plan.pdf');
 const OUT_PNG = path.join(ROOT, 'FunRide Bike Village - Layout Plan.png');
