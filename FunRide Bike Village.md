@@ -14,7 +14,7 @@ The village sits on the lawn between **Roxas Boulevard** (north) and **Independe
 4. **Bikes and Coffee & Photowall.** Bikes and Coffee is in the northeast corner. Along the top of the queue lanes are the three photowalls: 21 KM, 10 KM and 5 KM.
 5. **Sponsor blocks, north.** The red rider-flow lanes split the floor into blocks. The north blocks hold the DOT Booth, Dr. O, Oxecure, Neutra K and Wert PH.
 6. **Sponsor blocks, south.** BDO, Specialign, Fitbar, Cargo Boss, Popcycle, Gatorade, Pepsi and Espace Wellness.
-7. **AC Health, AC Mobility & BYD Showroom.** The southwest block holds two separate big booths: AC Health / AC Mobility, and just below it across a walkway, the BYD Showroom.
+7. **BYD Showroom.** The southwest block holds the BYD Showroom, a 10 × 15 m truss tent.
 8. **Merchants.** Two rows of merchant booths near the exit: Sugar High and Swiss Proli & Take Out, plus 8 open merchant slots.
 9. **Stage & Tech.** The stage faces the floor from the west, with Tech to its north. Myriad and ARF sit beside the stage, and Smoke10 is just above Tech.
 10. **Tents along the west fence.** Three tents line the west fence: BYD, DOT, and Artists & Other Sponsors. VIP Portalets stand just outside the fence.
@@ -33,6 +33,7 @@ Newest first. Add a line here whenever the layout, the 3D sim or the PDF changes
 
 | Date | Change |
 |---|---|
+| 2026-11-24 | AC Health / AC Mobility booth removed. **BYD Showroom** expanded from 10 × 9 m to **10 × 15 m** (32.8 × 49.2 ft), same design stretched: raised floor and turf both grow, trusses/flags follow. It now fills the old AC + showroom block (centre moved from y 717 to y 677). |
 | 2026-11-24 | Main Stage is labelled **L 20 ft × W 12 ft × H 3 ft** everywhere (info card, booth list, plan, schedule); the 3D stage keeps its larger drawn size. |
 | 2026-11-24 | Main Stage enlarged from 20 × 12 ft to 24 × 14 ft (same centre; at least 3.6 m from Tech, Myriad, the tents and 5.4 m from the lane). The back wall is now an LED screen showing the FunRide PH logo and "Moving people. Inspiring change.", with a lighting truss on top. |
 | 2026-11-24 | DOT Booth is labelled **10 × 20 ft** everywhere (info card, booth list, plan, schedule); the 3D tent keeps its larger drawn size. |
@@ -66,8 +67,7 @@ Booths in the 3D model and in `FunRide Bike Village - Layout Plan.pdf` are drawn
 | Open tent (shared) | Gatorade / Pepsi | 10 × 10 |
 | Open tent | Tech | 10 × 20 |
 | Booth stall only | Espace Wellness | 5 × 5 |
-| Big booth | AC Health / AC Mobility | 24.5 × 32 |
-| BYD truss tent + arch | BYD Showroom | 29.5 × 32.8 |
+| BYD truss tent + arch | BYD Showroom | 32.8 × 49.2 (10 × 15 m) |
 | BYD tents | BYD Garage, BYD Test Drive | 5 × 3 m, 16.5 × 3 m |
 | BYD lane | Test Drive Lane | 24.7 × 3 m |
 | Aircon tent (VIP) | Artists & Other Sponsors | 12 × 24 |
@@ -120,11 +120,10 @@ Booths in the 3D model and in `FunRide Bike Village - Layout Plan.pdf` are drawn
 |---|---|
 | DOT Booth | Northwest queue block; 10 × 20 ft branded tent, photo wall with 3D DOT letters on its east side |
 
-### BYD & AC
+### BYD
 | Booth | Location |
 |---|---|
-| AC Health / AC Mobility | Southwest block |
-| BYD Showroom | Truss tent just below AC Health / AC Mobility; Shark 6, cafe, AC Health and test drive counters, arch at the front |
+| BYD Showroom | Southwest block, 10 × 15 m truss tent; Shark 6, cafe, AC Health and test drive counters, arch at the front |
 | BYD Test Drive Registration | Just outside the Entrance; sign up here for the test drive |
 | BYD Garage | Independence Road, north half; test drive registration table |
 | BYD Test Drive | Independence Road, north half; two shallow tents with Shark 6, Seal and Atto 2 |

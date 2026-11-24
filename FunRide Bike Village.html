@@ -181,7 +181,7 @@ const CATS = {
   stage:{name:'Stage & Tech',bg:'#1d1ea6',fg:'#ffffff'},
   sponsor:{name:'Sponsors',bg:'#ffd23d',fg:'#1b1d6e'},
   tent:{name:'Tents & Portalets',bg:'#3db2f0',fg:'#ffffff'},
-  byd:{name:'BYD & AC',bg:'#5cd6df',fg:'#132060'},
+  byd:{name:'BYD',bg:'#5cd6df',fg:'#132060'},
   dot:{name:'DOT Booth',bg:'#ff7a1d',fg:'#ffffff'},
   ops:{name:'Operations',bg:'#23219c',fg:'#ffffff'},
   merch:{name:'Merchants',bg:'#c3ef69',fg:'#1f3a12'},
@@ -227,10 +227,8 @@ const ITEMS = [
   {id:'common-portalets-2',name:'Common Portalets (east)',cat:'tent',x:922,y:175,w:100,h:24,ht:2.4,label:'COMMON\nPORTALETS',desc:'Common portalets at the south edge of the KM 0 plaza, 2 of 2.'},
   // DOT
   {id:'dot-booth',name:'DOT Booth',cat:'dot',x:618.5,y:528,ft:[20,15],tent:'open',brand:'dot',disp:{w:6.5,d:4},szLabel:'10 × 20',sz:'10 ft × 20 ft tent · 8 × 4 ft photo wall',label:'DOT\nBOOTH',desc:'Department of Tourism branded tent (10 × 20 ft) in the northwest queue block: 8 × 20 ft backdrop, main table, cocktail table, 8 covered chairs and a monitor. Beside it: an 8 × 4 ft photo wall with 3D DOT letters (3 × 2 ft each).'},
-  // BYD & AC (two separate 32 x 24.5 ft big booths, with a walkway between them)
-  {id:'ac',name:'AC Health / AC Mobility',cat:'byd',x:630,y:629,ft:[32,24.5],tent:'big',ht:2.8,label:'AC HEALTH\nAC MOBILITY',desc:'AC Health / AC Mobility big booth in the southwest block, separate from the BYD Showroom.'},
-  // BYD Showroom from the BYD proposed layout: 10 x 9 m truss tent, raised floor + turf with the Shark 6, inflatable arch in front
-  {id:'byd-showroom',name:'BYD Showroom',cat:'byd',x:630,y:717,ft:[32.8,29.5],tent:'big',kind:'byd-showroom',sz:'33 ft × 29.5 ft (10 × 9 m) truss tent, arch included',label:'BYD SHOWROOM',desc:'BYD truss tent from the proposed layout: a raised black floor with the BYD Cafe, AC Health and Test Drive Registration counters, cafe tables and digital standees, then turf with the Shark 6 pickup and camping chairs. In front: the BYD sign, an inflatable BYD arch, inflatable tubes and six BYD flags on the truss.'},
+  // BYD Showroom from the BYD proposed layout, expanded to a 10 x 15 m truss tent, raised floor + turf with the Shark 6, inflatable arch in front
+  {id:'byd-showroom',name:'BYD Showroom',cat:'byd',x:630,y:677,ft:[32.8,49.2],tent:'big',kind:'byd-showroom',sz:'33 ft × 49 ft (10 × 15 m) truss tent, arch included',label:'BYD SHOWROOM',desc:'BYD truss tent from the proposed layout: a raised black floor with the BYD Cafe, AC Health and Test Drive Registration counters, cafe tables and digital standees, then turf with the Shark 6 pickup and camping chairs. In front: the BYD sign, an inflatable BYD arch, inflatable tubes and six BYD flags on the truss.'},
   {id:'byd-td-reg',name:'BYD Test Drive Registration',cat:'byd',x:1086,y:888,ft:[10,10],tent:'open',topLogo:'byd',label:'BYD TEST DRIVE\nREGISTRATION',desc:'Sign up here for the BYD Test Drive. Just outside the Entrance.'},
   // test drive stays on Independence Road and stops at the South Drive corner (x 1232)
   {id:'byd-td',name:'BYD Test Drive',cat:'byd',x:1122.5,y:939,w:165,h:30,kind:'byd-td',sz:'2 tents, 16.5 × 3 m',label:'BYD TEST DRIVE',desc:'Two shallow white tents on the north half of Independence Road with the display cars parked side-on: Shark 6 DM-O, Seal and Atto 2. The south half of the road stays open as the test drive lane.'},
@@ -305,11 +303,11 @@ const TOUR = [
   {t:'Bikes and Coffee & Photowall',k:'Operations',d:'Bikes and Coffee sits in the northeast corner. Along the top of the queue lanes are the three photowalls: 21 KM, 10 KM and 5 KM.',ids:['bikes-coffee','pw-21','pw-10','pw-5'],az:.15,el:.45,dist:38},
   {t:'Sponsor blocks, north',k:'Sponsors · DOT Booth',d:'The red rider-flow lanes split the floor into blocks. The north blocks hold the branded DOT tent (10 × 20 ft) and the Oxecure / Dr. O shared tent (15 × 10 ft), each with a photo wall and 3D letters beside it, plus Neutra K and Wert PH.',ids:['dot-booth','oxecure','dro','neutrak','wertph'],az:.15,el:.5,dist:30},
   {t:'Sponsor blocks, south',k:'Sponsors',d:'Further down: the branded BDO and Specialign tents (10 × 10 ft, each with a photo wall and 3D letters), then Fitbar, Cargo Boss, Popcycle, Gatorade, Pepsi and Espace Wellness.',ids:['bdo','specialign','fitbar','cargoboss','popcycle','gatorade','pepsi','espace'],az:.25,el:.5,dist:30},
-  {t:'AC Health, AC Mobility & BYD Showroom',k:'BYD & AC',d:'The southwest block holds AC Health / AC Mobility and, just below it, the BYD Showroom: a 10 × 9 m truss tent with the BYD Cafe, AC Health and Test Drive Registration counters on a raised floor, the Shark 6 on turf, and an inflatable BYD arch at the front.',ids:['ac','byd-showroom'],az:.7,el:.5,dist:26},
+  {t:'BYD Showroom',k:'BYD',d:'The southwest block holds the BYD Showroom: a 10 × 15 m truss tent with the BYD Cafe, AC Health and Test Drive Registration counters on a raised floor, the Shark 6 on turf, and an inflatable BYD arch at the front.',ids:['byd-showroom'],az:.7,el:.5,dist:26},
   {t:'Merchants',k:'Merchants',d:'Two rows of merchant booths sit near the exit: Sugar High and Swiss Proli & Take Out, plus 8 open merchant slots.',ids:['m-open-1','m-sugar','m-swiss','m-open-2','m-open-3','m-open-4','m-open-5','m-open-6','m-open-7','m-open-8'],az:.05,el:.55,dist:34},
   {t:'Stage & Tech',k:'Stage & Tech · Operations',d:'The stage faces the floor from the west, with Tech to its north. Myriad and ARF sit beside the stage, and Smoke10 is just above Tech.',ids:['stage','tech','myriad','arf','smoke10'],az:1.25,el:.45,dist:36},
   {t:'Tents along the west fence',k:'Tents & Portalets',d:'Three tents line the west fence: BYD, DOT, and Artists & Other Sponsors. VIP Portalets stand just outside the fence.',ids:['byd-tent','dot-tent','artists-tent','vip-portalets'],az:1.3,el:.5,dist:38},
-  {t:'Artists Entrance',k:'BYD & AC',d:'Artists come in from Independence Road through their own entrance and follow the path north to the artists tent.',ids:['artists-entrance'],target:[290,800],az:.6,el:.6,dist:34},
+  {t:'Artists Entrance',k:'BYD',d:'Artists come in from Independence Road through their own entrance and follow the path north to the artists tent.',ids:['artists-entrance'],target:[290,800],az:.6,el:.6,dist:34},
   {t:'Standby per Wave',k:'Standby & Ramp',d:'Riders gather here by wave. Bike Check Station sits at its southeast corner. When a wave is called, it rides along Exit to Start and up the green Ramp to the KM 0 plaza.',ids:['standby','bike-check','exit-to-start','ramp'],az:-.45,el:.55,dist:40},
   {t:'Common Portalets & restricted area',k:'Tents & Portalets · Restricted',d:'Two Common Portalets sit side by side at the south edge of the KM 0 plaza. The black circle is a restricted area with no setup.',ids:['common-portalets-1','common-portalets-2','restricted'],az:.3,el:.6,dist:40},
   {t:'Start at KM 0',k:'Roxas Boulevard',d:'Each wave rides up from Standby and stops in a grid behind the START arch on Roxas Boulevard, beside the KM 0 plaza. The Satellite Stage sits on the plaza right beside the road, clear of the rider route. Rizal Park is across the road.',ids:['start','km0','satellite-stage'],target:[910,70],az:-.5,el:.45,dist:34},
@@ -1246,7 +1244,7 @@ function turfTex(w, d){
 
 function bydShowroom(it){
   const g = new THREE.Group(), hw = it.w / S / 2, hd = it.h / S / 2;
-  const tx = hw - .12, z0 = -hd + .1, z1 = hd - 1.6, zm = z0 + 3.8, top = 3.3;   // tent x ±tx, z z0..z1; floor/turf split at zm
+  const tx = hw - .12, z0 = -hd + .1, z1 = hd - 1.6, zm = z0 + 3.8 * (z1 - z0) / 7.29, top = 3.3;   // tent x ±tx, z z0..z1; floor/turf split at zm
   // raised black floor (back) and turf (front)
   const edge = solid('#f2f3f5');
   const plat = new THREE.Mesh(new THREE.BoxGeometry(2 * tx, .15, zm - z0), [edge, edge, solid('#1f2024', {roughness:.85}), edge, edge, edge]);

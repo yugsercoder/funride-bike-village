@@ -231,11 +231,11 @@ function booths(detail, names) {
       else s.push(`<text x="${x2 + 3}" y="${(y1 + y2) / 2}" text-anchor="start" dominant-baseline="central" font-family="${FONT}" font-weight="700" font-size="4.6" fill="#16183f"><tspan x="${x2 + 3}" dy="-3">SHARED</tspan><tspan x="${x2 + 3}" dy="5.6">10 × 10 FT</tspan></text>`);
     });
     // dimension lines on the big booths and stage
-    // AC Health / AC Mobility (32 x 24.5 ft) and the BYD Showroom (32.8 x 29.5 ft) are two separate booths
-    ['ac', 'byd-showroom'].forEach(id => {
+    // BYD Showroom (10 x 15 m)
+    ['byd-showroom'].forEach(id => {
       const b = BY[id], bx1 = b.x - b.w / 2, bx2 = b.x + b.w / 2, by1 = b.y - b.h / 2, by2 = b.y + b.h / 2;
-      if (id === 'ac') s.push(dim(bx1, by1 - 5, bx2, by1 - 5, '32 FT'));
-      s.push(dimV(bx1 - 5, by1, bx1 - 5, by2, f1(b.ft[1]) + ' FT'));
+      s.push(dim(bx1, by1 - 5, bx2, by1 - 5, '10 M'));
+      s.push(dimV(bx1 - 5, by1, bx1 - 5, by2, '15 M'));
     });
     const st = BY['stage'];
     s.push(dimV(st.x + st.w / 2 + 7, st.y - st.h / 2, st.x + st.w / 2 + 7, st.y + st.h / 2, f1(st.ft[1]) + ' FT'));
@@ -301,7 +301,7 @@ const SCHEDULE = [
     ['Oxecure / Dr. O (shared, + photo wall)', '10 × 15', 1], ['DOT Booth (+ photo wall)', '10 × 20', 1], ['Myriad', '10 × 10', 1], ['ARF', '10 × 10', 1], ['Smoke10', '10 × 10', 1],
     ['Tech', '10 × 20', 1], ['Bike Check Station', '10 × 10', 1], ['BYD Test Drive Registration', '10 × 10', 1]]],
   ['Big booths', 'big', [
-    ['AC Health / AC Mobility', '24.5 × 32', 1], ['BYD Showroom (truss tent + arch)', '29.5 × 32.8', 1]]],
+    ['BYD Showroom (truss tent + arch, 10 × 15 m)', '32.8 × 49.2', 1]]],
   ['Aircon tents (VIPs)', 'aircon', [
     ['Artists & other sponsors', '12 × 24', 1], ['DOT', '12 × 12', 1], ['BYD', '12 × 12', 1]]],
   ['Merchants', 'merch', [['Merchant booth', '10 × 10', 10]]],
@@ -384,7 +384,7 @@ tfoot td{background:#16187a;color:#fff;font-weight:700}
         <li><b>Finish</b> on Independence Road, beside BYD Garage and BYD Test Drive.</li>
         <li><b>BYD Test Drive</b> stays on Independence Road and stops at the South Drive corner.</li>
         <li><b>DOT</b>, <b>Oxecure / Dr. O</b>, <b>BDO</b> and <b>Specialign</b> are branded tents with an 8 × 4 ft photo wall and 3D letters on their east side.</li>
-        <li><b>AC Health / AC Mobility</b> (24.5 × 32 ft) and the <b>BYD Showroom</b> (29.5 × 32.8 ft truss tent with arch) are two separate booths.</li>
+        <li><b>BYD Showroom</b>: 10 × 15 m (32.8 × 49.2 ft) truss tent with arch; AC Health / AC Mobility booth removed.</li>
         <li><b>BYD</b>: Garage + Test Drive tents on the north half of Independence Road; the south half is the test drive lane out to South Drive.</li>
         <li>Artists come in through the Artists Entrance and follow the path to the aircon tents.</li>
       </ol>
