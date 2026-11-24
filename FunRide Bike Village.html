@@ -535,6 +535,18 @@ function boxBooth(it, opt){
 const poleMat = new THREE.MeshStandardMaterial({color:col('#d9dce6'), roughness:.4, metalness:.3});
 const tableMat = new THREE.MeshStandardMaterial({color:col('#f7f7f4'), roughness:.8});
 const BACKDIR = {n:[0, -1], s:[0, 1], e:[1, 0], w:[-1, 0]};
+// booth crew: staff stand behind the front table/counter facing out (front = fx, fz), and some booths get a
+// customer on the outside facing in. half = booth half-depth toward the front, len = table length, back = table back edge from the front
+function boothCrew(it, fx, fz, half, len, back){
+  const out = Math.atan2(fx, fz), sx = fz, sz = -fx;   // sx, sz: along the table
+  const n = len > 2.6 ? 2 : 1, inner = half - back - .25, outer = half + .45;
+  for (let i = 0; i < n; i++){
+    const t = n === 1 ? 0 : (i ? 1 : -1) * len / 4;
+    BRAND_PEOPLE.push({base:it.id, x:fx * inner + sx * t, z:fz * inner + sz * t, ry:out});
+  }
+  if (Math.random() < .6){ const t = (Math.random() - .5) * len * .5;
+    BRAND_PEOPLE.push({base:it.id, x:fx * outer + sx * t, z:fz * outer + sz * t, ry:out + Math.PI}); }
+}
 function tentBooth(it){
   // topLogo: white branded canopy with the sponsor logo printed on the roof
   const c = it.topLogo ? {bg:'#ffffff', fg:'#1b1d22'} : CATS[it.cat], w = it.w / S, d = it.h / S, g = new THREE.Group();
@@ -556,6 +568,7 @@ function tentBooth(it){
     counter.position.set(0, .5, d / 2 - .35); g.add(counter);
     const panel = new THREE.Mesh(new THREE.BoxGeometry(w, 2.2, .08), [plain, plain, plain, plain, faceMat(flat, w, 2.2, c.bg, c.fg), plain]);
     panel.position.set(0, 1.1, -d / 2 + .1); g.add(panel);
+    boothCrew(it, 0, 1, d / 2, w * .9, .6);
     it.top = 2.2; return g;
   }
 
@@ -595,6 +608,7 @@ function tentBooth(it){
   const table = new THREE.Mesh(new THREE.BoxGeometry(tl, .75, .6), tableMat);
   table.position.set(fx * (w / 2 - .5), .375, fz * (d / 2 - .5));
   table.rotation.y = fx !== 0 ? Math.PI / 2 : 0; g.add(table);
+  if (label) boothCrew(it, fx, fz, (fx !== 0 ? w : d) / 2, tl, .8);   // open merchant slots stay empty
   it.top = eave + valH; return g;
 }
 
@@ -1012,7 +1026,7 @@ function brandBooth(it){
     t.position.set(x, .455, hd - .62); g.add(r ? toMate(t) : t);
     // a few brochures / products on top
     [[-.35, '#ffffff'], [-.15, B.border], [.1, '#ffffff']].forEach(([dx, c], i) => { const p = new THREE.Mesh(new THREE.BoxGeometry(.12, .06 + i * .03, .09), solid(c)); p.position.set(x + dx, .94 + i * .015, hd - .62); g.add(r ? toMate(p) : p); });
-    BRAND_PEOPLE.push({base:it.id, x:x + cx, z:hd - 1.15});
+    BRAND_PEOPLE.push({base:it.id, x:x + cx, z:hd - 1.15, ry:0});   // behind the table, facing visitors
   };
   let chairs;
   if (B.split){
@@ -1275,19 +1289,24 @@ function bydShowroom(it){
     gg.fillStyle = '#1b2a8a'; gg.font = `700 ${h * .2}px ${FONT}`; gg.textAlign = 'center'; gg.textBaseline = 'middle'; gg.fillText('✕ AC Health', w / 2, h * .38); gg.font = `500 ${h * .07}px ${FONT}`; gg.fillText('An Ayala Company', w / 2, h * .55); });
   counter(tx - .75, z0 + .7, 1.1, .62, (gg, w, h) => { gg.fillStyle = '#ffffff'; gg.fillRect(0, 0, w, h); logo(gg, 'byd', w / 2, h * .32, w * .55, h * .16);
     gg.fillStyle = '#3a3f47'; gg.font = `600 ${h * .065}px ${FONT}`; gg.textAlign = 'center'; gg.fillText('TEST DRIVE REGISTRATION', w / 2, h * .5); });
-  [-.5, .5].forEach(x => { g.add(barStool(x, z0 + 1.35, fy)); const s = barStool(x, z0 + .15, fy); s.rotation.y = Math.PI; g.add(s); });
-  [tx - 1.0, tx - .5].forEach(x => { const s = barStool(x, z0 + .15, fy); s.rotation.y = Math.PI; g.add(s); });
-  BRAND_PEOPLE.push({base:it.id, x:-tx + 1.0, z:z0 + .3}, {base:it.id, x:tx - .75, z:z0 + .25});
+  [-.5, .5].forEach(x => g.add(barStool(x, z0 + 1.35, fy)));
+  // staff behind the three counters, a guest at each counter front
+  [[-tx + 1.0, z0 + .25], [0, z0 + .16], [tx - .75, z0 + .16]].forEach(([x, z]) => BRAND_PEOPLE.push({base:it.id, x, z, ry:0}));
+  [[-tx + 1.5, z0 + 1.7], [0, z0 + 1.35], [tx - .75, z0 + 1.4]].forEach(([x, z]) => BRAND_PEOPLE.push({base:it.id, x, z, ry:Math.PI}));
   // centre digital totem, cafe tables with cube seats, standees at the floor edge
   g.add(standee(0, z0 + 1.9, fy, true));
   [-3.1, -1.25, 1.25, 3.1].forEach((x, i) => { g.add(cafeTable(x, zm - 1.55, fy)); g.add(cube(x - .55, zm - 1.45, fy, i % 2 ? 'navy' : 'white')); g.add(cube(x + .55, zm - 1.65, fy, i % 2 ? 'white' : 'navy')); });
   g.add(standee(-tx + .45, zm - .35, fy)); g.add(standee(tx - .45, zm - .35, fy));
+  // visitors browsing the floor and sitting area
+  [[-2.2, z0 + 3.0, 0, z0 + 1.9], [1.9, z0 + 3.5, 0, z0 + 1.9], [-.6, z0 + 4.4, 0, z0 + 1.9], [-1.25, zm - .95, -1.25, zm - 1.55], [3.1, zm - .95, 3.1, zm - 1.55], [2.3, zm - 2.4, tx - .45, zm - .35]].forEach(([x, z, lx, lz]) => BRAND_PEOPLE.push({base:it.id, x, z, ry:Math.atan2(lx - x, lz - z)}));
   // turf: Shark 6 on display, camping sets, high table + stool
   const shark = vehicle('shark6', '#3f5f8f'); shark.position.set(-.3, 0, (zm + z1) / 2 - .05); shark.rotation.y = Math.PI + .26; g.add(shark);
   g.add(campSet(-tx + .85, zm + .9)); g.add(campSet(tx - .95, zm + .9));
   const side = new THREE.Group(); const oct = new THREE.Mesh(new THREE.CylinderGeometry(.24, .24, .98, 8), FURN.grey); oct.position.y = .49; side.add(oct);
   const wt = new THREE.Mesh(new THREE.CylinderGeometry(.26, .26, .04, 8), FURN.wood); wt.position.y = 1.0; side.add(wt); side.position.set(tx - .45, 0, z1 - .45); g.add(side);
   g.add(barStool(tx - 1.05, z1 - .55, 0));
+  // people on the turf around the Shark 6 and the camping sets
+  [[3.0, (zm + z1) / 2 - 1.2], [-3.9, (zm + z1) / 2 + 1.2], [3.1, z1 - 1.5], [-tx + .85, zm + 1.75], [tx - .95, zm + 1.75]].forEach(([x, z]) => BRAND_PEOPLE.push({base:it.id, x, z, ry:Math.atan2(-.3 - x, (zm + z1) / 2 - z)}));   // looking at the Shark 6
   // front: lit BYD letters sign, inflatable arch, inflatable tubes
   const sign = new THREE.Group();
   const pl = new THREE.Mesh(new THREE.BoxGeometry(2.3, .42, .5), solid('#33363d')); pl.position.y = .21; sign.add(pl);
@@ -1345,7 +1364,7 @@ function bydLineup(it, which){
     const tbl = new THREE.Mesh(new THREE.BoxGeometry(2.4, .76, .75), [FURN.black, FURN.black, FURN.black, FURN.black, artMat(2.4, .76, (gg, ww, hh) => { gg.fillStyle = '#16171b'; gg.fillRect(0, 0, ww, hh); logo(gg, 'bydW', ww / 2, hh * .45, ww * .3, hh * .3); }), FURN.black]);
     tbl.position.set(.3, .38, -.35); tbl.rotation.y = Math.PI; g.add(tbl);
     [-.5, .5].forEach(dx => { const ch = barStool(.3 + dx, .45, 0); ch.rotation.y = Math.PI; g.add(ch); });
-    [-.5, .5].forEach(dx => BRAND_PEOPLE.push({base:it.id, x:.3 + dx, z:.95}));
+    [-.5, .5].forEach(dx => BRAND_PEOPLE.push({base:it.id, x:.3 + dx, z:.95, ry:Math.PI}));   // facing the table / road
     const fs = flagStand(3.2); fs.position.set(-w / 2 + .35, 0, -hd + .35); fs.rotation.y = Math.PI; g.add(fs);
   } else {
     const line = [['shark6', '#3f5f8f'], ['seal', '#f4f5f7'], ['atto2', '#c9d98f']];
@@ -1636,6 +1655,7 @@ const ROUTES = [
   mkPath([[1075,915],[1022,890],[1000,850],[1000,795],[945,795],[945,443],[793,443],[793,587],[798,587],[798,682],[695,682],[688,682],[688,765],[572,765],[572,587],[688,587],[688,443],[684,300],[620,280]]),
   mkPath([[1075,915],[1022,890],[1000,850],[1000,795],[945,795],[945,443],[793,443],[793,587],[798,587],[798,682],[800,742],[858,742],[858,830],[645,830],[645,880],[617,905],[600,965]])
 ];
+const PERSON_MAT = {hair:new THREE.MeshStandardMaterial({color:col('#1d1712'), roughness:.9}), eye:new THREE.MeshBasicMaterial({color:col('#111111')}), shoe:new THREE.MeshStandardMaterial({color:col('#15161c')})};
 function makePerson(){
   const g = new THREE.Group();
   const body = new THREE.Mesh(new THREE.CylinderGeometry(.17, .2, .75, 8), new THREE.MeshStandardMaterial({color:col(shirt[Math.random() * shirt.length | 0])}));
@@ -1644,6 +1664,12 @@ function makePerson(){
   legs.position.y = .22; g.add(legs);
   const head = new THREE.Mesh(new THREE.SphereGeometry(.15, 10, 8), new THREE.MeshStandardMaterial({color:col(skin[Math.random() * skin.length | 0])}));
   head.position.y = 1.3; g.add(head);
+  // front is local +z: eyes on the face, hair cap on the back of the head, shoes pointing forward
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(.158, 10, 8, 0, Math.PI * 2, 0, Math.PI * .62), PERSON_MAT.hair);
+  hair.position.set(0, 1.315, -.012); hair.rotation.x = -.55; g.add(hair);
+  [-.055, .055].forEach(x => { const e = new THREE.Mesh(new THREE.SphereGeometry(.022, 6, 4), PERSON_MAT.eye); e.position.set(x, 1.33, .137); g.add(e); });
+  [-.07, .07].forEach(x => { const sh = new THREE.Mesh(new THREE.BoxGeometry(.1, .06, .24), PERSON_MAT.shoe); sh.position.set(x, .03, .05); g.add(sh); });
+  g.userData.person = true;
   g.traverse(o => { if (o.isMesh) o.castShadow = true; });
   return g;
 }
@@ -1674,7 +1700,19 @@ function tdUpdate(dt){
 }
 tdUpdate(0);
 // booth staff behind the sponsor tables and a guest posing at each photo wall
-BRAND_PEOPLE.forEach(p => { const m = makePerson(); m.position.set(X(BY[p.base].x) + p.x, 0, Z(BY[p.base].y) + p.z); m.rotation.y = Math.random() * 6; scene.add(m); });
+{
+  const down = new THREE.Raycaster(), from = new V3(), DOWN = new V3(0, -1, 0);
+  BRAND_PEOPLE.forEach(p => {
+    const it = BY[p.base], a = (it.rot || 0) * Math.PI / 180, c = Math.cos(a), sn = Math.sin(a);
+    const wx = X(it.x) + p.x * c + p.z * sn, wz = Z(it.y) - p.x * sn + p.z * c;
+    // stand on whatever floor the booth has under this spot (raised floor, turf), never sunk into it
+    let y = 0;
+    if (ROOT[it.id]){ ROOT[it.id].updateMatrixWorld(true); from.set(wx, .6, wz); down.set(from, DOWN); down.far = .6;
+      const hit = down.intersectObject(ROOT[it.id], true).find(h => h.point.y < .45); if (hit) y = hit.point.y; }
+    const m = makePerson(); m.position.set(wx, y, wz); m.rotation.y = p.ry != null ? p.ry + a : Math.random() * 6; scene.add(m);
+  });
+}
+if (location.hash === '#debug') window.FR_DEBUG = {BRAND_PEOPLE, BY, ROOT, scene, X, Z, camera, controls, renderer};
 
 /* ---------- riders: waves leave standby, ride from START, cross FINISH ---------- */
 function makeCyclist(){
