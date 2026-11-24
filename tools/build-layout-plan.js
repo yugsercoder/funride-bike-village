@@ -143,8 +143,12 @@ function features(detail) {
   box(BY['vip-portalets'], '#3db2f0', '#1b6fa0', '#fff', ['VIP PORTALETS'], { vert: true });
   box(BY['common-portalets-1'], '#3db2f0', '#1b6fa0', '#fff', ['COMMON PORTALETS']);
   box(BY['common-portalets-2'], '#3db2f0', '#1b6fa0', '#fff', ['COMMON PORTALETS']);
-  box(BY['byd-td'], '#5cd6df', '#1d8b94', '#132060', ['BYD TEST DRIVE']);
-  box(BY['byd-garage'], '#5cd6df', '#1d8b94', '#132060', ['BYD GARAGE']);
+  box(BY['byd-td'], '#5cd6df', '#1d8b94', '#132060', ['BYD TEST DRIVE', '16.5 × 3 M · 3 CARS'], { sub: 1 });
+  box(BY['byd-garage'], '#5cd6df', '#1d8b94', '#132060', ['BYD GARAGE', '5 × 3 M'], { sub: 1 });
+  box(BY['byd-td-lane'], '#62676f', '#ffffff', '#ffffff', ['TEST DRIVE LANE  →']);
+  // crowd barricade between the finish bike parking and the BYD tents
+  { const bp = BY['barricade-byd'].path.map(p => p.join(',')).join(' ');
+    s.push(`<polyline points="${bp}" fill="none" stroke="#ffffff" stroke-width="4"/><polyline points="${bp}" fill="none" stroke="#4a4e60" stroke-width="2" stroke-dasharray="4 1.5"/>`); }
   box(BY['artists-entrance'], '#5cd6df', '#1d8b94', '#132060', ['ARTISTS', 'ENTRANCE']);
   box(BY['cardinal'], '#2f5b2c', '#1c3a1a', '#fff', ['CARDINAL']);
   box(BY['km21'], '#23219c', '#16187a', '#fff', ['21 KM']);
@@ -165,12 +169,14 @@ function features(detail) {
 
 /* ---------- sized booths ---------- */
 const SHARED = [
-  { ids: ['dro', 'oxecure'], label: 'DR. O / OXECURE · 10 × 15 FT SHARED', side: 'top' },
+  { ids: ['oxecure', 'dro'], label: 'OXECURE / DR. O · 10 × 15 FT SHARED', side: 'top' },
   { ids: ['gatorade', 'pepsi'], label: 'SHARED 10 × 10 FT', side: 'right' },
 ];
 const sharedIds = new Set(SHARED.flatMap(g => g.ids));
 function sizeLine(it) {
   if (sharedIds.has(it.id)) return '';
+  if (it.szPlan) return it.szPlan;
+  if (it.szLabel) return `${it.szLabel} FT`;   // booked size label (drawn size may differ)
   if (it.tent === 'stage') return `${f1(it.ft[1])} × ${f1(it.ft[0])} FT · 3 FT H`;
   // write as the short side first, like the booking sheet
   const [a, b] = [it.ft[0], it.ft[1]].sort((p, q) => p - q);
@@ -199,7 +205,6 @@ function booths(detail, names) {
     if (detail || names) {
       let name = it.label != null && it.label !== '' ? it.label : it.name.toUpperCase();
       if (it.cat === 'merch' && !it.label) name = 'MERCHANT\n' + it.name.replace(/\D/g, '');
-      name = name.replace(/REGIS-\nTRATION/, 'REGISTRATION');
       const lines = name.split('\n');
       const sz = sizeLine(it);
       const vert = it.h > it.w * 1.6;
@@ -208,6 +213,12 @@ function booths(detail, names) {
     }
     g += '</g>';
     s.push(g);
+    if (it.disp) {
+      // photo wall + 3D letters, 1 ft east of the tent (from the sample tent designs)
+      const dw = it.disp.w * FT, dh = it.disp.d * FT, dx = it.x + it.w / 2 + FT;
+      s.push(`<g><rect x="${dx}" y="${it.y - dh / 2}" width="${dw}" height="${dh}" fill="#ffffff" stroke="#16183f" stroke-width=".7"/>`
+        + (detail || names ? fitText(['PHOTO', 'WALL'], dx + dw / 2, it.y, dw, dh, '#16183f', { max: 3.6, min: 2 }) : '') + '</g>');
+    }
   });
   if (detail) {
     // shared tent outlines + notes
@@ -220,14 +231,14 @@ function booths(detail, names) {
       else s.push(`<text x="${x2 + 3}" y="${(y1 + y2) / 2}" text-anchor="start" dominant-baseline="central" font-family="${FONT}" font-weight="700" font-size="4.6" fill="#16183f"><tspan x="${x2 + 3}" dy="-3">SHARED</tspan><tspan x="${x2 + 3}" dy="5.6">10 × 10 FT</tspan></text>`);
     });
     // dimension lines on the big booths and stage
-    // AC Health / AC Mobility and BYD Showroom are two separate 32 x 24.5 ft booths
+    // AC Health / AC Mobility (32 x 24.5 ft) and the BYD Showroom (32.8 x 29.5 ft) are two separate booths
     ['ac', 'byd-showroom'].forEach(id => {
       const b = BY[id], bx1 = b.x - b.w / 2, bx2 = b.x + b.w / 2, by1 = b.y - b.h / 2, by2 = b.y + b.h / 2;
       if (id === 'ac') s.push(dim(bx1, by1 - 5, bx2, by1 - 5, '32 FT'));
-      s.push(dimV(bx1 - 5, by1, bx1 - 5, by2, '24.5 FT'));
+      s.push(dimV(bx1 - 5, by1, bx1 - 5, by2, f1(b.ft[1]) + ' FT'));
     });
     const st = BY['stage'];
-    s.push(dimV(st.x + st.w / 2 + 7, st.y - st.h / 2, st.x + st.w / 2 + 7, st.y + st.h / 2, '20 FT'));
+    s.push(dimV(st.x + st.w / 2 + 7, st.y - st.h / 2, st.x + st.w / 2 + 7, st.y + st.h / 2, f1(st.ft[1]) + ' FT'));
     const kc = BY['kit'];
     s.push(dimV(kc.x + kc.w / 2 + 6, kc.y - kc.h / 2, kc.x + kc.w / 2 + 6, kc.y + kc.h / 2, '30 FT'));
     const bg = BY['baggage'];
@@ -286,16 +297,16 @@ const SCHEDULE = [
   ['Open tents', 'open', [
     ['Bikes and Coffee (near bike rack)', '10 × 10', 1], ['Neutra K', '10 × 10', 1], ['Wert PH', '10 × 10', 1],
     ['Fitbar', '10 × 10', 1], ['Cargo Boss', '10 × 10', 1], ['Espace Wellness (booth stall only)', '5 × 5', 1, 'stall'],
-    ['Gatorade / Pepsi (shared)', '10 × 10', 1], ['Popcycle', '10 × 10', 1], ['Specialign', '10 × 10', 1], ['BDO', '10 × 10', 1],
-    ['Dr. O / Oxecure (shared)', '10 × 15', 1], ['Myriad', '10 × 10', 1], ['ARF', '10 × 10', 1], ['Smoke10', '10 × 10', 1],
+    ['Gatorade / Pepsi (shared)', '10 × 10', 1], ['Popcycle', '10 × 10', 1], ['Specialign (+ photo wall)', '10 × 10', 1], ['BDO (+ photo wall)', '10 × 10', 1],
+    ['Oxecure / Dr. O (shared, + photo wall)', '10 × 15', 1], ['DOT Booth (+ photo wall)', '10 × 20', 1], ['Myriad', '10 × 10', 1], ['ARF', '10 × 10', 1], ['Smoke10', '10 × 10', 1],
     ['Tech', '10 × 20', 1], ['Bike Check Station', '10 × 10', 1], ['BYD Test Drive Registration', '10 × 10', 1]]],
   ['Big booths', 'big', [
-    ['DOT', '10 × 20', 1], ['AC Health / AC Mobility', '24.5 × 32', 1], ['BYD Showroom', '24.5 × 32', 1]]],
+    ['AC Health / AC Mobility', '24.5 × 32', 1], ['BYD Showroom (truss tent + arch)', '29.5 × 32.8', 1]]],
   ['Aircon tents (VIPs)', 'aircon', [
     ['Artists & other sponsors', '12 × 24', 1], ['DOT', '12 × 12', 1], ['BYD', '12 × 12', 1]]],
   ['Merchants', 'merch', [['Merchant booth', '10 × 10', 10]]],
   ['Photowall', null, [['5 km', 'to follow', 1], ['10 km', 'to follow', 1], ['21 km', 'to follow', 1]]],
-  ['Stages', 'stage', [['Main Stage (H 3 ft)', '20 × 12', 1], ['Satellite Stage, KM 0 (H 3 ft)', '12 × 12', 1]]],
+  ['Stages', 'stage', [['Main Stage (H 3 ft, LED screen)', '20 × 12', 1], ['Satellite Stage, KM 0 (H 3 ft)', '12 × 12', 1]]],
 ];
 let grandQty = 0, grandArea = 0;
 const schedRows = SCHEDULE.map(([grp, type, rows]) => {
@@ -372,7 +383,9 @@ tfoot td{background:#16187a;color:#fff;font-weight:700}
         <li><b>Entrance</b> southeast corner, <b>Exit</b> southwest corner.</li>
         <li><b>Finish</b> on Independence Road, beside BYD Garage and BYD Test Drive.</li>
         <li><b>BYD Test Drive</b> stays on Independence Road and stops at the South Drive corner.</li>
-        <li><b>AC Health / AC Mobility</b> and <b>BYD Showroom</b> are two separate 24.5 × 32 ft big booths.</li>
+        <li><b>DOT</b>, <b>Oxecure / Dr. O</b>, <b>BDO</b> and <b>Specialign</b> are branded tents with an 8 × 4 ft photo wall and 3D letters on their east side.</li>
+        <li><b>AC Health / AC Mobility</b> (24.5 × 32 ft) and the <b>BYD Showroom</b> (29.5 × 32.8 ft truss tent with arch) are two separate booths.</li>
+        <li><b>BYD</b>: Garage + Test Drive tents on the north half of Independence Road; the south half is the test drive lane out to South Drive.</li>
         <li>Artists come in through the Artists Entrance and follow the path to the aircon tents.</li>
       </ol>
     </div>
