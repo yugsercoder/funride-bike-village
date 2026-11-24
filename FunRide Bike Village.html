@@ -16,6 +16,8 @@ html,body{height:100%;background:var(--sky);color:var(--ink);font-family:var(--b
 #app{position:fixed;inset:0;overflow:hidden}
 #scene{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
 #scene.hovering{cursor:pointer}
+#scene.fp{cursor:grab;touch-action:none}
+#scene.looking{cursor:grabbing}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,input:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 
@@ -38,8 +40,20 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--yellow);outline
 .modes button:hover{background:#eef0fb}
 .modes button[aria-pressed="true"]{background:var(--navy);color:#fff}
 .modes .sep{width:1px;background:var(--line);margin:4px 2px}
+.modes .more{font-size:18px;line-height:13px;padding:8px 10px;letter-spacing:.05em}
+#moreMenu{position:fixed;z-index:8;padding:6px;display:grid;gap:2px;min-width:170px}
+#moreMenu[hidden]{display:none}
+#moreMenu button{border:0;background:transparent;text-align:left;padding:9px 12px;border-radius:8px;font:600 13px/1 var(--body);color:var(--navy);cursor:pointer}
+#moreMenu button:hover{background:#eef0fb}
+.phase{display:inline-flex;gap:2px;padding:3px;background:#eef0fb;border-radius:9px;justify-self:start}
+.phase[hidden]{display:none}
+.phase button{border:0;background:transparent;padding:6px 12px;border-radius:7px;font:600 12px/1 var(--body);color:var(--navy);cursor:pointer}
+.phase button[aria-pressed="true"]{background:#fff;box-shadow:0 1px 3px rgba(22,24,122,.18)}
+.phase button[hidden]{display:none}
+#dir .dsub{font-size:12px;color:var(--muted);line-height:1.4}
+#dir .dstat{font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums}
 
-#dir{position:absolute;top:calc(env(safe-area-inset-top,0px) + 76px);right:max(16px,env(safe-area-inset-right,0px));width:280px;max-height:calc(100% - 300px);display:flex;flex-direction:column;overflow:hidden}
+#dir{position:absolute;top:calc(env(safe-area-inset-top,0px) + 76px);right:max(16px,env(safe-area-inset-right,0px));width:280px;max-height:calc(100% - 340px);display:flex;flex-direction:column;overflow:hidden}
 #dir header{padding:12px 14px 8px;display:grid;gap:8px;border-bottom:1px solid var(--line)}
 #dir h2{margin:0;font:700 15px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--navy)}
 #dir input{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:14px var(--body);background:#fff;color:var(--ink)}
@@ -52,7 +66,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--yellow);outline
 .grp button small{margin-left:auto;color:var(--muted)}
 #dirToggle{display:none}
 
-#bar{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 16px);width:min(560px,calc(100% - 32px));padding:14px 16px;display:grid;gap:8px}
+#bar{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 16px);width:min(560px,calc(100% - 360px));box-sizing:border-box;padding:14px 16px;display:grid;gap:8px}
 #bar .kicker{display:flex;justify-content:space-between;gap:8px;font:600 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
 #bar .kicker span:last-child{color:var(--muted);font-variant-numeric:tabular-nums}
 #bar h2{margin:0;font:700 22px/1.1 var(--display);color:var(--navy);text-transform:uppercase;letter-spacing:.02em;text-wrap:balance}
@@ -61,6 +75,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--yellow);outline
 .ctrls button{border:1px solid var(--line);background:#fff;padding:8px 12px;border-radius:8px;font:600 13px/1 var(--body);color:var(--navy)}
 .ctrls button.primary{background:var(--navy);border-color:var(--navy);color:#fff}
 .ctrls button:hover{border-color:var(--navy)}
+.ctrls button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
 .dots{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
 .dots button{width:9px;height:9px;padding:0;border-radius:50%;border:0;background:#cdd1e6}
 .dots button.on{background:var(--red)}
@@ -85,18 +100,44 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--yellow);outline
 #toast{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 16px);transform:translate(-50%,-140%);background:var(--red);color:#fff;font:700 14px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;padding:9px 14px;border-radius:8px;transition:transform .35s;pointer-events:none}
 #toast.show{transform:translate(-50%,0)}
 
+/* minimisable panels + full view */
+.minbtn{position:absolute;top:7px;right:7px;width:26px;height:26px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--muted);font:700 18px/1 var(--body);display:grid;place-items:center;z-index:2}
+.minbtn:hover{background:#eef0fb;color:var(--navy)}
+.panel.brand{padding-right:68px}
+#bar.panel{padding-right:72px}
+.closeb{position:absolute;top:7px;right:7px;width:26px;height:26px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--muted);font:700 20px/1 var(--body);display:grid;place-items:center;z-index:2;cursor:pointer}
+.closeb:hover{background:#eef0fb;color:var(--red)}
+.brand .minbtn,#bar .minbtn{right:36px}
+.panel.closed{display:none!important}
+#reopen{position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);left:max(16px,env(safe-area-inset-left,0px));border:0;padding:8px 14px;font:700 12px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--navy);cursor:pointer;z-index:4}
+#reopen:hover{color:var(--red)}
+#reopen[hidden]{display:none}
+body.clean #reopen{display:none!important}
+#dir header{padding-right:40px;position:relative}
+#dir header .minbtn{top:8px}
+#info .minbtn{right:36px}
+.panel.min .hide-min{display:none!important}
+.panel.min{gap:4px}
+#bar.min{padding-top:10px;padding-bottom:10px}
+#bar.min h2{font-size:16px}
+#dir.min header{border-bottom:0}
+#info.min{padding-right:72px}
+body.clean .brand,body.clean #dir,body.clean #bar,body.clean #info{display:none!important}
 @media (max-width:820px){
+  /* phone layout, top to bottom with 10px gaps: title box, mode buttons (wrap, never scroll), then the booth card / booth list; tour bar at the bottom */
   .brand{padding:10px 12px;max-width:calc(100% - 32px)}
   .brand h1{font-size:22px}
-  .modes{top:auto;right:auto;left:max(16px,env(safe-area-inset-left,0px));bottom:auto;position:absolute;top:calc(env(safe-area-inset-top,0px) + 128px);flex-wrap:nowrap;overflow-x:auto;max-width:calc(100% - 32px);box-sizing:border-box;justify-content:flex-start}
+  .modes{top:calc(env(safe-area-inset-top,0px) + 96px);right:auto;left:max(16px,env(safe-area-inset-left,0px));max-width:calc(100% - 32px);box-sizing:border-box;flex-wrap:wrap;justify-content:flex-start;gap:4px}
+  body.brand-closed .modes{top:calc(env(safe-area-inset-top,0px) + 60px)}
   .modes button{white-space:nowrap;padding:8px 10px}
   #dirToggle{display:inline-block}
-  #dir{display:none;top:calc(env(safe-area-inset-top,0px) + 180px);left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));width:auto;max-height:calc(100% - 200px);z-index:5}
+  #dir{display:none;top:var(--below-modes,190px);left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));width:auto;max-height:calc(100% - var(--below-modes,190px) - 16px);z-index:5}
   #dir.open{display:flex}
+  body.dir-open #bar,body.dir-open #info{display:none!important}
   #bar{width:calc(100% - 32px);box-sizing:border-box;padding:12px}
   #bar h2{font-size:18px}
   #bar p{font-size:13px}
-  #info{left:max(16px,env(safe-area-inset-left,0px));width:auto;bottom:auto;top:calc(env(safe-area-inset-top,0px) + 180px);z-index:6}
+  #info{left:max(16px,env(safe-area-inset-left,0px));width:auto;bottom:auto;top:var(--below-modes,190px);z-index:6}
 }
 @media (prefers-reduced-motion:reduce){.live .dot::before{animation:none}}
 </style>
@@ -105,51 +146,66 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--yellow);outline
   <canvas id="scene" aria-label="3D model of the FunRide PH bike village at Rizal Park"></canvas>
   <div id="tags"></div>
 
-  <header class="brand panel">
-    <div class="eyebrow">FunRide PH · Event site</div>
+  <button id="reopen" class="panel" hidden aria-label="Show the info boxes again">Info</button>
+  <header class="brand panel" id="brandBox">
+    <button class="closeb" aria-label="Close this box" title="Close (Esc)">×</button>
+    <button class="minbtn" aria-label="Minimise" aria-expanded="true">−</button>
     <h1>Bike Village</h1>
-    <div class="sub">Rizal Park, Manila · Booths at true size, site layout approximate</div>
-    <div class="stripe" aria-hidden="true"><i></i><i></i><i></i></div>
-    <div class="live"><span class="dot">Live</span><span id="clock">--:--</span><span id="stats">Waiting for wave 1</span></div>
+    <div class="live hide-min"><span class="dot">Live</span><span id="clock">--:--</span></div>
   </header>
 
   <nav class="modes panel" aria-label="View mode">
     <button id="mTour" aria-pressed="true">Guided tour</button>
-    <button id="mWalk" aria-pressed="false">Walk the lanes</button>
-    <button id="mFree" aria-pressed="false">Explore freely</button>
+    <button id="mWalkthrough" aria-pressed="false">Walkthrough</button>
+    <button id="mFree" aria-pressed="false">Explore</button>
     <button id="mTop" aria-pressed="false">Top view</button>
-    <span class="sep"></span>
-    <button id="mSim" aria-pressed="true">Simulation on</button>
     <button id="dirToggle" aria-pressed="false">Booth list</button>
+    <button id="mMore" class="more" aria-expanded="false" aria-haspopup="true" aria-label="More options">⋯</button>
   </nav>
+  <div id="moreMenu" class="panel" hidden>
+    <button id="mSim" aria-pressed="true">Simulation on</button>
+    <button id="mClean" aria-pressed="false" title="Hide the info boxes for a full view (H)">Hide panels</button>
+  </div>
 
   <aside id="dir" class="panel" aria-label="Booth directory">
     <header>
       <h2>Legend &amp; booth list</h2>
-      <input id="q" type="search" placeholder="Find a booth, e.g. EMS" autocomplete="off">
+      <button class="minbtn" aria-label="Minimise" aria-expanded="true">−</button>
+      <div class="dsub hide-min">FunRide PH · Rizal Park, Manila · Booths at true size, layout approximate</div>
+      <div class="dstat hide-min" id="stats">Waiting for wave 1</div>
+      <input id="q" class="hide-min" type="search" placeholder="Find a booth, e.g. EMS" autocomplete="off">
     </header>
-    <div class="list" id="list"></div>
+    <div class="list hide-min" id="list"></div>
   </aside>
 
   <section id="bar" class="panel" aria-live="polite">
+    <button class="closeb" aria-label="Close this box" title="Close (Esc)">×</button>
+    <button class="minbtn" aria-label="Minimise" aria-expanded="true">−</button>
     <div class="kicker"><span id="bKick">Guided tour</span><span id="bCount"></span></div>
+    <div class="phase hide-min" id="phaseSw" hidden role="group" aria-label="Walkthrough phase">
+      <button id="phLive" aria-pressed="false" hidden>Live</button>
+      <button id="phMorning" aria-pressed="true">Morning</button>
+      <button id="phAfter" aria-pressed="false">After the race</button>
+    </div>
     <h2 id="bTitle">Welcome</h2>
-    <p id="bText"></p>
-    <div class="progress" id="bProg"><i></i></div>
-    <div class="ctrls" id="bCtrls">
+    <p id="bText" class="hide-min"></p>
+    <div class="progress hide-min" id="bProg"><i></i></div>
+    <div class="ctrls hide-min" id="bCtrls">
       <button id="prev" aria-label="Previous stop">Back</button>
       <button id="play" class="primary">Pause tour</button>
       <button id="next" aria-label="Next stop">Next</button>
+      <button id="gunBtn" class="primary" hidden>Gun start</button>
       <div class="dots" id="dots"></div>
     </div>
   </section>
 
   <div id="info" class="panel" hidden>
     <button class="x" id="infoX" aria-label="Close">×</button>
-    <div class="cat"><span class="sw" id="iSw"></span><span id="iCat"></span></div>
+    <button class="minbtn" aria-label="Minimise" aria-expanded="true">−</button>
+    <div class="cat hide-min"><span class="sw" id="iSw"></span><span id="iCat"></span></div>
     <h3 id="iName"></h3>
-    <div class="size" id="iSize" hidden><b id="iSzV"></b><span id="iType"></span></div>
-    <p id="iDesc"></p>
+    <div class="size hide-min" id="iSize" hidden><b id="iSzV"></b><span id="iType"></span></div>
+    <p id="iDesc" class="hide-min"></p>
   </div>
   <div id="toast"></div>
   <div id="loading">Building the bike village…</div>
@@ -197,6 +253,7 @@ const CATS = {
    Booths with `ft:[along x, along y]` are drawn at their real size; `tent` picks the 3D model;
    `back` is the side the back siding / back panel faces (n, s, e, w). */
 const FT = 3.048;
+const RACK_FREE = 16;   // Bike Rack: slots 16-29 on the west side take the finishers' bikes
 const ITEMS = [
   // Stage & Tech
   {id:'stage',name:'Main Stage',cat:'stage',x:497,y:580,ft:[14,24],ht:.914,vert:1,kind:'stage',tent:'stage',szLabel:'12 × 20',szPlan:'20 × 12 FT · 3 FT H',sz:'L 20 ft × W 12 ft × H 3 ft',desc:'Main stage on the west side of the floor, facing the booth area.'},
@@ -234,7 +291,7 @@ const ITEMS = [
   {id:'byd-td',name:'BYD Test Drive',cat:'byd',x:1122.5,y:939,w:165,h:30,kind:'byd-td',sz:'2 tents, 16.5 × 3 m',label:'BYD TEST DRIVE',desc:'Two shallow white tents on the north half of Independence Road with the display cars parked side-on: Shark 6 DM-O, Seal and Atto 2. The south half of the road stays open as the test drive lane.'},
   {id:'byd-garage',name:'BYD Garage',cat:'byd',x:1010,y:939,w:50,h:30,kind:'byd-garage',sz:'1 tent, 5 × 3 m',label:'BYD GARAGE',desc:'Test drive check-in tent: registration table with staff. Test drive cars leave from the lane right in front of it.'},
   {id:'byd-td-lane',name:'BYD Test Drive Lane',cat:'byd',x:1108.5,y:972,w:247,h:30,kind:'td-lane',sz:'3 m wide lane',label:'TEST DRIVE',desc:'Open lane on the south half of Independence Road. Test drive cars pull out in front of the BYD Garage, drive east and turn onto South Drive, then come back the same way.'},
-  {id:'artists-entrance',name:'Artists Entrance',cat:'byd',x:238,y:923,w:88,h:32,label:'ARTISTS\nENTRANCE',desc:'Separate entrance for artists, with a path up to the west fence.'},
+  {id:'artists-entrance',name:'Artists Entrance',cat:'byd',x:252,y:898,w:88,h:32,label:'ARTISTS\nENTRANCE',desc:'Separate entrance for artists, set back on the lawn just inside Independence Road, with a path up to the west fence.'},
   // Operations
   // Operations column: tents with back sidings, back panel on the barrier (west) side
   {id:'baggage',name:'Baggage Area',cat:'ops',x:890,y:495.7,ft:[10,30],tent:'back',back:'w',vert:1,label:'BAGGAGE AREA',desc:'Bag drop at the top of the operations column.'},
@@ -244,7 +301,7 @@ const ITEMS = [
   {id:'info',name:'Info / Lost & Found',cat:'ops',x:890,y:760.25,ft:[10,10],tent:'back',back:'w',vert:1,label:'INFO / LOST\n& FOUND',desc:'Information desk and lost and found.'},
   {id:'command',name:'Command Center',cat:'ops',x:890,y:805.25,ft:[10,10],tent:'back',back:'w',vert:1,label:'COMMAND\nCENTER',desc:'Event command post.'},
   {id:'ems',name:'EMS',cat:'ops',x:890,y:850.25,ft:[10,10],tent:'back',back:'w',label:'EMS',desc:'Emergency medical services, closest booth to the Entrance.'},
-  {id:'bike-check',name:'Bike Check Station',cat:'ops',x:648,y:322,ft:[10,10],tent:'open',back:'w',label:'BIKE\nCHECK',desc:'Bike check at the southeast corner of Standby per Wave.'},
+  {id:'bike-check',name:'Bike Check Station',cat:'ops',x:642,y:315,ft:[10,10],tent:'open',back:'w',label:'BIKE\nCHECK',desc:'Bike check at the southeast corner of Standby per Wave.'},
   {id:'bike-rack',name:'Bike Rack',cat:'ops',x:1019,y:625,w:66,h:325,ht:.6,vert:1,kind:'rack',label:'BIKE RACK',desc:'Long bike rack along the east fence.'},
   {id:'bikes-coffee',name:'Bikes and Coffee',cat:'ops',x:1002,y:421,ft:[10,10],tent:'open',label:'BIKES &\nCOFFEE',desc:'Bikes and Coffee in the northeast corner, beside the bike rack.'},
   {id:'myriad',name:'Myriad',cat:'ops',x:490,y:685,ft:[10,10],rot:-35,tent:'open',back:'w',label:'MYRIAD',desc:'Myriad booth beside the stage.'},
@@ -252,7 +309,6 @@ const ITEMS = [
   {id:'pw-21',name:'Photowall 21 KM',cat:'ops',x:727,y:405,w:44,h:16,kind:'wall',sz:'To follow',label:'21 KM',desc:'Photowall for 21 km finishers. Size to follow.'},
   {id:'pw-10',name:'Photowall 10 KM',cat:'ops',x:790,y:405,w:44,h:16,kind:'wall',sz:'To follow',label:'10 KM',desc:'Photowall for 10 km finishers. Size to follow.'},
   {id:'pw-5',name:'Photowall 5 KM',cat:'ops',x:866,y:405,w:44,h:16,kind:'wall',sz:'To follow',label:'5 KM',desc:'Photowall for 5 km finishers. Size to follow.'},
-  {id:'km21',name:'21 KM Marker',cat:'ops',x:340,y:980,w:44,h:16,ht:.9,label:'21 KM',desc:'21 km route marker on Independence Road.'},
   // Merchants (2 named + 8 open slots)
   {id:'m-open-1',name:'Open merchant slot 1',cat:'merch',x:619,y:794,ft:[10,10],tent:'open',label:'',desc:'Open merchant slot.'},
   {id:'m-sugar',name:'Sugar High',cat:'merch',x:661,y:794,ft:[10,10],tent:'open',label:'SUGAR\nHIGH',desc:'Merchant booth in the first row.'},
@@ -269,12 +325,12 @@ const ITEMS = [
   {id:'ramp',name:'Ramp',cat:'standby',x:676,y:140,w:22,h:40,vert:1,kind:'ramp',label:'RAMP',desc:'Green ramp up onto the KM 0 plaza, at the top of Exit to Start.'},
   {id:'exit-to-start',name:'Exit to Start',cat:'standby',x:676,y:210,w:22,h:96,vert:1,kind:'ramp',white:1,label:'EXIT TO START',desc:'Lane from Standby per Wave north to the ramp and the start line.'},
   // Start & Finish
-  {id:'start',name:'Start',cat:'start',x:895,y:65,w:20,h:66,kind:'arch',label:'START',desc:'Start line at KM 0 on Roxas Boulevard.'},
+  {id:'start',name:'Start',cat:'start',x:895,y:65,w:20,h:66,kind:'arch',label:'START',desc:'Gun start at KM 0 on Roxas Boulevard. Waves line up two abreast in the closed south lane facing South Drive, roll through the arch, U-turn at the cones and ride west in the same lane to Katigbak Parkway.'},
   {id:'finish',name:'Finish',cat:'start',x:814,y:956,w:20,h:68,kind:'arch',label:'FINISH',desc:'Finish line on Independence Road.'},
   // crowd-control barricade between the finish bike parking and the BYD Garage / Test Drive tents (open to the village side)
   {id:'barricade-byd',name:'Barricade (Finish / BYD)',cat:'start',x:1102.5,y:956,w:245,h:64,kind:'barricade',path:[[980,924],[980,988],[1225,988]],sz:'1.1 m high crowd barriers',desc:'Metal crowd barriers that separate the finish bike parking from the BYD area and run along the south edge of the test drive lane. The east end stays open so test drive cars can turn onto South Drive.'},
   // Cardinal
-  {id:'cardinal',name:'Cardinal',cat:'cardinal',x:560,y:935,w:62,h:18,ht:.9,label:'CARDINAL',desc:'Cardinal on Independence Road, west of the finish.'},
+  {id:'cardinal',name:'Cardinal',cat:'cardinal',x:560,y:911,w:62,h:18,ht:.9,label:'CARDINAL',desc:'Cardinal on the roadside lawn just north of Independence Road, west of the finish, so the road stays clear.'},
   // Restricted
   {id:'restricted',name:'Restricted Area',cat:'restricted',x:994,y:282,w:132,h:132,kind:'restricted',desc:'No setup in this area.'},
   // Landmarks (roads and fixed places)
@@ -307,11 +363,11 @@ const TOUR = [
   {t:'Merchants',k:'Merchants',d:'Two rows of merchant booths sit near the exit: Sugar High and Swiss Proli & Take Out, plus 8 open merchant slots.',ids:['m-open-1','m-sugar','m-swiss','m-open-2','m-open-3','m-open-4','m-open-5','m-open-6','m-open-7','m-open-8'],az:.05,el:.55,dist:34},
   {t:'Stage & Tech',k:'Stage & Tech · Operations',d:'The stage faces the floor from the west, with Tech to its north. Myriad and ARF sit beside the stage, and Smoke10 is just above Tech.',ids:['stage','tech','myriad','arf','smoke10'],az:1.25,el:.45,dist:36},
   {t:'Tents along the west fence',k:'Tents & Portalets',d:'Three tents line the west fence: BYD, DOT, and Artists & Other Sponsors. VIP Portalets stand just outside the fence.',ids:['byd-tent','dot-tent','artists-tent','vip-portalets'],az:1.3,el:.5,dist:38},
-  {t:'Artists Entrance',k:'BYD',d:'Artists come in from Independence Road through their own entrance and follow the path north to the artists tent.',ids:['artists-entrance'],target:[290,800],az:.6,el:.6,dist:34},
-  {t:'Standby per Wave',k:'Standby & Ramp',d:'Riders gather here by wave. Bike Check Station sits at its southeast corner. When a wave is called, it rides along Exit to Start and up the green Ramp to the KM 0 plaza.',ids:['standby','bike-check','exit-to-start','ramp'],az:-.45,el:.55,dist:40},
+  {t:'Artists Entrance',k:'BYD',d:'Artists step off Independence Road onto the lawn, go through their own entrance and follow the path north to the artists tent.',ids:['artists-entrance'],target:[290,800],az:.6,el:.6,dist:34},
+  {t:'Standby per Wave',k:'Standby & Ramp',d:'Riders gather here by wave after Registration, Kit Claiming, Baggage and the Bike Check Station at the southeast corner. When a wave is called, it rides north along the Exit to Start lane, straight up the green Ramp and off its north end onto the KM 0 plaza, then out onto Roxas Boulevard.',ids:['standby','bike-check','exit-to-start','ramp'],az:-.45,el:.55,dist:40},
   {t:'Common Portalets & restricted area',k:'Tents & Portalets · Restricted',d:'Two Common Portalets sit side by side at the south edge of the KM 0 plaza. The black circle is a restricted area with no setup.',ids:['common-portalets-1','common-portalets-2','restricted'],az:.3,el:.6,dist:40},
-  {t:'Start at KM 0',k:'Roxas Boulevard',d:'Each wave rides up from Standby and stops in a grid behind the START arch on Roxas Boulevard, beside the KM 0 plaza. The Satellite Stage sits on the plaza right beside the road, clear of the rider route. Rizal Park is across the road.',ids:['start','km0','satellite-stage'],target:[910,70],az:-.5,el:.45,dist:34},
-  {t:'Finish on Independence Road',k:'Start & Finish · Cardinal',d:'Past the FINISH arch, bikes are parked in rows, all facing the BYD Test Drive. Cardinal sits west of the finish, and the 21 KM marker further down the road.',ids:['finish','cardinal','km21'],target:[800,955],az:-.15,el:.45,dist:46},
+  {t:'Gun start at KM 0',k:'Roxas Boulevard',d:'Only the south lane of Roxas Boulevard is closed (orange cones on the centre line). Each wave lines up two abreast behind the START arch, facing South Drive. On the gun at KM 0 the wave rolls through the arch, U-turns at the cones and rides west in the same lane toward Katigbak Parkway.',ids:['start','km0','satellite-stage'],target:[850,80],az:2.75,el:.5,dist:46},
+  {t:'Finish on Independence Road',k:'Start & Finish · Cardinal',d:'Finishers appear on Independence Road and ride east past Cardinal to cross the FINISH arch. They go straight in through the Entrance and park at the Bike Rack, so no bikes stay on the road, then walk in to start the Bike Village experience.',ids:['finish','cardinal'],target:[820,950],az:-.15,el:.45,dist:50},
   {t:'Quirino Grandstand',k:'Landmarks',d:'South of Independence Road: the Quirino Grandstand, with parking on both sides. That completes the tour.',ids:['grandstand','parking-w','parking-e'],az:3.0,el:.55,dist:66}
 ];
 
@@ -418,7 +474,7 @@ const VENUE = [[362,378],[655,352],[815,380],[1065,380],[1065,790],[1010,905],[6
 polyFloor(VENUE, '#f2f4f9', .03);
 
 // lane markings
-const dashMat = new THREE.MeshBasicMaterial({color:col('#f3f3f0')});
+const dashMat = new THREE.MeshBasicMaterial({color:col('#f3f3f0'), transparent:true, opacity:.75});
 function dashes(x1, y1, x2, y2, dash, gap, width, y, mat){
   const a = new V3(X(x1), 0, Z(y1)), b = new V3(X(x2), 0, Z(y2));
   const L = a.distanceTo(b), dir = b.clone().sub(a).normalize(), ang = Math.atan2(-dir.z, dir.x);
@@ -433,10 +489,10 @@ function dashes(x1, y1, x2, y2, dash, gap, width, y, mat){
   }
   scene.add(im); return im;
 }
-dashes(100, 65, 1290, 65, 1.6, 1.4, .18);
-dashes(133, 110, 133, 915, 1.6, 1.4, .18);
-dashes(1247, 110, 1247, 915, 1.6, 1.4, .14);
-dashes(100, 956, 1255, 956, 1.6, 1.4, .18);
+dashes(100, 65, 1290, 65, 1.6, 1.4, .1);
+dashes(133, 110, 133, 915, 1.6, 1.4, .1);
+dashes(1247, 110, 1247, 915, 1.6, 1.4, .08);
+dashes(100, 956, 1255, 956, 1.6, 1.4, .1);
 // parking stalls
 for (let i = 0; i < 9; i++){ dashes(115 + i * 19, 1005, 115 + i * 19, 1035, .3, 0, .08, .03); }
 for (let i = 0; i < 7; i++){ dashes(1160 + i * 19, 1005, 1160 + i * 19, 1035, .3, 0, .08, .03); }
@@ -449,7 +505,7 @@ flatLabel('KATIGBAK PARKWAY', 133, 440, 24, 180, {vert:true});
 flatLabel('SOUTH DRIVE', 1249, 440, 22, 140, {vert:true});
 flatLabel('INDEPENDENCE ROAD', 180, 958, 146, 22);
 flatLabel('PHOTOWALL', 757, 426, 90, 14, {bg:null, pill:false, fg:'#16183f'});
-flatLabel('MERCHANTS', 775, 821, 90, 14, {bg:null, pill:false, fg:'#16183f'});
+flatLabel('MERCHANTS', 775, 818, 80, 11, {bg:null, pill:false, fg:'#16183f'});
 flatLabel('PARKING', 192, 1040, 90, 16, {bg:null, pill:false, fg:'#5b5f75'});
 flatLabel('PARKING', 1219, 1040, 90, 16, {bg:null, pill:false, fg:'#5b5f75'});
 
@@ -495,21 +551,34 @@ const BARRIER_GAP = [575, 599];
   im.castShadow = true; scene.add(im);
 }
 // rider flow (red dotted queue lanes)
-const flowMat = new THREE.MeshBasicMaterial({color:col('#d3202f')});
+const flowMat = new THREE.MeshBasicMaterial({color:col('#d3202f'), transparent:true, opacity:.7});
 const FLOW = [
-  [[684,300],[684,443]],
+  [[662,285],[688,285],[688,443]],                          // up from the top lane into Standby per Wave
   // the y 587 lane passes through the barrier opening into the gap between the two Registration booths
-  [[572,443],[945,443],[945,587],[572,587],[572,443]],
-  [[688,443],[688,765]], [[793,443],[793,587]],
-  [[572,587],[572,765],[800,765]], [[798,587],[798,682]], [[695,682],[800,682],[800,742],[858,742],[858,830],[645,830],[645,870]],
-  [[945,587],[945,795],[1000,795],[1000,850]]
+  [[572,443],[945,443],[945,587],[572,587],[572,443]],      // top lane, middle lane and the west / east sides
+  [[945,443],[985,443]],                                    // to Bikes and Coffee
+  [[688,443],[688,765]],                                    // west-centre aisle
+  [[796,443],[796,765]],                                    // east-centre aisle, straight through both sponsor blocks
+  [[572,587],[572,812],[590,830]],                          // west lane down to the merchants
+  [[572,765],[796,765]], [[695,682],[796,682]],             // cross aisles in the south block
+  [[796,742],[858,742],[858,830],[590,830]],                // round to the merchants aisle
+  [[645,830],[645,870],[622,884]],                          // merchants aisle out through the Exit
+  [[945,587],[945,795],[1000,795],[1000,850],[1008,880]]    // east lane from the Entrance
 ];
-FLOW.forEach(pl => { for (let i = 1; i < pl.length; i++) dashes(pl[i-1][0], pl[i-1][1], pl[i][0], pl[i][1], .45, .45, .2, .05, flowMat); });
+const flowLanes = [];
+FLOW.forEach(pl => { for (let i = 1; i < pl.length; i++) flowLanes.push(dashes(pl[i-1][0], pl[i-1][1], pl[i][0], pl[i][1], .35, .55, .11, .05, flowMat)); });
+// morning walkthrough only: a single lane from the Entrance, up the east side and along the top lane to the Exit to Start (toward KM 0)
+const MORNING_LANE = [[[1008,880],[1000,850],[1000,795],[945,795],[945,443],[688,443],[688,285],[676,268]], [[688,285],[662,285]]];
+const morningLane = [];
+MORNING_LANE.forEach(pl => { for (let i = 1; i < pl.length; i++){
+  const l = dashes(pl[i-1][0], pl[i-1][1], pl[i][0], pl[i][1], .35, .55, .11, .05, flowMat);
+  l.visible = false; morningLane.push(l);
+} });
 // artists path
 const pathMat = new THREE.MeshStandardMaterial({color:col('#2a2c3a'), roughness:1});
-[[[370,684],[272,684]],[[272,684],[252,740]],[[252,740],[252,905]]].forEach(([a, b]) => {
+[[[370,684],[272,684]],[[272,684],[252,740]],[[252,740],[252,882]]].forEach(([a, b]) => {
   const s = wallSeg(a[0], a[1], b[0], b[1], .04, .9, pathMat); s.castShadow = false;
-  dashes(a[0], a[1], b[0], b[1], .5, .5, .12, .05);
+  dashes(a[0], a[1], b[0], b[1], .5, .5, .08, .05);
 });
 
 /* ---------- builders ---------- */
@@ -1476,12 +1545,14 @@ function build(it){
       for (let i = 0; i < n; i++){
         const z = -it.h / S / 2 + 1 + i * ((it.h / S - 2) / (n - 1));
         [-1, 1].forEach(side => {
+          if (side < 0 && i >= RACK_FREE) return;   // west side, south half: kept free for finishers parking in the sim
           const x = side * (it.w / S / 2 + .45);
           // bike pointing east-west, parked against the rack
           [-.42, .42].forEach(off => { o.position.set(x + off, .32, z); o.rotation.set(0, 0, 0); o.updateMatrix(); wheels.setMatrixAt(wi++, o.matrix); });
           o.position.set(x, .55, z); o.updateMatrix(); frames.setMatrixAt(fi++, o.matrix);
         });
       }
+      wheels.count = wi; frames.count = fi;
       wheels.castShadow = frames.castShadow = true;
       g.add(wheels, frames);
       break;
@@ -1518,8 +1589,8 @@ function build(it){
       }
       const line = new THREE.Mesh(new THREE.BoxGeometry(.6, .03, span - 1), [plain, plain, new THREE.MeshStandardMaterial({map:chk}), plain, plain, plain]);
       line.position.set(0, .03, 0); g.add(line);
-      // painted word on the approach side (start: riders wait east of it, finish: riders arrive from the west)
-      const appr = it.id === 'start' ? 1 : -1, pw = 1.6, pd = span * .55;
+      // painted word on the approach side: both arches are ridden eastbound (start grid waits west of START facing South Drive)
+      const appr = -1, pw = 1.6, pd = span * .55;
       const word = new THREE.Mesh(new THREE.PlaneGeometry(pw, pd), new THREE.MeshBasicMaterial({map:textCanvas(it.label, pw, pd, {fg:'#ffffff', vert:true, fill:.8}), transparent:true, depthWrite:false}));
       word.rotation.x = -Math.PI / 2; word.rotation.z = appr > 0 ? 0 : Math.PI;   // letters face the riders coming in
       word.position.set(appr * 2.2, .05, 0); word.renderOrder = 2; g.add(word);
@@ -1650,11 +1721,13 @@ function mkPath(pts){
 /* ---------- people walking the rider-flow lanes ---------- */
 const shirt = ['#c8202f','#16187a','#ffc928','#1fae4a','#ff7a1d','#3db2f0','#ffffff','#7c3aed','#0f766e'];
 const skin = ['#8d5a3b','#c68b5e','#e0b08a','#6b4429'];
-const ROUTES = [
-  mkPath([[1075,915],[1022,890],[1000,850],[1000,795],[945,795],[945,443],[688,443],[684,300],[640,290]]),
-  mkPath([[1075,915],[1022,890],[1000,850],[1000,795],[945,795],[945,443],[793,443],[793,587],[798,587],[798,682],[695,682],[688,682],[688,765],[572,765],[572,587],[688,587],[688,443],[684,300],[620,280]]),
-  mkPath([[1075,915],[1022,890],[1000,850],[1000,795],[945,795],[945,443],[793,443],[793,587],[798,587],[798,682],[800,742],[858,742],[858,830],[645,830],[645,880],[617,905],[600,965]])
+const IN = [[1075,915],[1022,890],[1008,880],[1000,850],[1000,795],[945,795],[945,443]];   // Entrance, up the east lane
+const ROUTE_PTS = [
+  IN.concat([[688,443],[688,285],[640,285]]),
+  IN.concat([[796,443],[796,682],[688,682],[688,765],[572,765],[572,587],[688,587],[688,443],[688,285],[620,285]]),
+  IN.concat([[796,443],[796,742],[858,742],[858,830],[645,830],[645,870],[622,884],[608,905],[600,965]])
 ];
+const ROUTES = ROUTE_PTS.map(mkPath);
 const PERSON_MAT = {hair:new THREE.MeshStandardMaterial({color:col('#1d1712'), roughness:.9}), eye:new THREE.MeshBasicMaterial({color:col('#111111')}), shoe:new THREE.MeshStandardMaterial({color:col('#15161c')})};
 function makePerson(){
   const g = new THREE.Group();
@@ -1700,6 +1773,9 @@ function tdUpdate(dt){
 }
 tdUpdate(0);
 // booth staff behind the sponsor tables and a guest posing at each photo wall
+const boothPeople = [];
+// morning (pre-race): only the race operations booths are staffed; every other booth is empty
+const MORNING_STAFFED = new Set(['reg-1', 'reg-2', 'kit', 'baggage', 'bike-check', 'info', 'command', 'ems', 'tech']);
 {
   const down = new THREE.Raycaster(), from = new V3(), DOWN = new V3(0, -1, 0);
   BRAND_PEOPLE.forEach(p => {
@@ -1710,11 +1786,12 @@ tdUpdate(0);
     if (ROOT[it.id]){ ROOT[it.id].updateMatrixWorld(true); from.set(wx, .6, wz); down.set(from, DOWN); down.far = .6;
       const hit = down.intersectObject(ROOT[it.id], true).find(h => h.point.y < .45); if (hit) y = hit.point.y; }
     const m = makePerson(); m.position.set(wx, y, wz); m.rotation.y = p.ry != null ? p.ry + a : Math.random() * 6; scene.add(m);
+    m.userData.base = p.base; boothPeople.push(m);
   });
 }
 if (location.hash === '#debug') window.FR_DEBUG = {BRAND_PEOPLE, BY, ROOT, scene, X, Z, camera, controls, renderer};
 
-/* ---------- riders: waves leave standby, ride from START, cross FINISH ---------- */
+/* ---------- riders: waves leave standby, take the ramp, line up on Roxas, gun start, U-turn to Katigbak ---------- */
 function makeCyclist(){
   const g = new THREE.Group();
   const tire = new THREE.MeshStandardMaterial({color:col('#111218'), roughness:.6});
@@ -1728,58 +1805,264 @@ function makeCyclist(){
   head.position.set(.22, 1.3, 0); g.add(head);
   g.traverse(o => { if (o.isMesh) o.castShadow = true; });
   g.userData.wheels = wheels;
+  g.userData.body = [jersey, head];
+  // the same rider on foot, walking beside the bike (person front is +z, bike front is +x)
+  const pusher = makePerson(); pusher.rotation.y = Math.PI / 2; pusher.position.set(-.05, 0, .55); pusher.visible = false; g.add(pusher);
+  g.userData.pusher = pusher;
   return g;
 }
+// rider on the bike, or bike parked alone; on = 'walk' puts the rider on foot beside the bike
+const mounted = (c, on) => { c.userData.body.forEach(m => m.visible = on === true); c.userData.pusher.visible = on === 'walk'; };
+// standby slots (4 x 3) inside Standby per Wave
 const SLOTS = [];
 for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) SLOTS.push([510 + c * 36, 225 + r * 30]);
-// finish corral on Independence Road, between the FINISH arch and the BYD Garage (7 x 3 bikes)
+// finishers park at the Bike Rack along the east fence (west side, south half), so no bikes stay on Independence Road
 const PARK = [];
-for (let c = 0; c < 7; c++) for (let r = 0; r < 3; r++) PARK.push([955 - c * 20, 940 + r * 15]);
-const parked = []; // queue of parked riders, oldest first
-// start grid on Roxas Boulevard, just behind the START arch (4 x 3), riders face the arch
+for (let i = RACK_FREE; i < 29; i++) PARK.push([1019 - 37.5, 625 + (-15.25 + i * 30.5 / 29) * 10]);
+const MY_SLOT = [1019 - 37.5, 625 + (-15.25 + 29 * 30.5 / 29) * 10];   // After the race: where *you* rack your bike
+const parked = []; // queue of parked bikes, oldest first
+// Roxas Boulevard: only the south (eastbound) lane is closed for the riders, y 65-98.
+// Start grid sits west of the START arch, 2 abreast x 6 rows, everyone facing east toward South Drive.
 const GRID = [];
-for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) GRID.push([915 + c * 20, 50 + r * 15]);
+for (let r = 0; r < 6; r++) for (let c = 0; c < 2; c++) GRID.push([862 - r * 20, 86 + c * 9]);
+const RAMP_BOX = [665, 687, 120, 258];      // Exit to Start lane + Ramp slab (map px), riders ride on top of it
+const SLAB_Y = .26;
+// standby -> Exit to Start lane -> straight up the green Ramp -> off the north end onto the KM 0 plaza -> into the closed lane
 function rideRoute(slot, g){
-  return mkPath([slot, [665, slot[1]], [676, 262], [676, 150], [700, 150], [1005, 150], [1010, 92], [1010, g[1]], [g[0] + 15, g[1]], g]);
+  return mkPath([slot, [665, slot[1]], [676, 266], [676, 258], [676, 120], [676, 106], [684, 93], [g[0] - 24, g[1]], g]);
+}
+// gun start: roll east through START, U-turn at the cones, back west in the same lane, then onto Katigbak Parkway
+const UTURN_X = 978;
+function raceRoute(g){
+  return mkPath([g, [UTURN_X - 26, g[1]], [UTURN_X - 6, 88], [UTURN_X, 80], [UTURN_X - 6, 73], [UTURN_X - 26, 72], [190, 72], [160, 78], [128, 98], [118, 118]]);
+}
+const KATIGBAK_CUT = 118; // riders leave the sim once they are on Katigbak Parkway
+// cones: closed-lane line on the centre of Roxas, U-turn cones, lane closed east of the U-turn
+{
+  const pts = [];
+  for (let x = 175; x <= UTURN_X + 4; x += 40) pts.push([x, 67]);
+  pts.push([UTURN_X + 12, 72], [UTURN_X + 12, 80], [UTURN_X + 12, 88], [UTURN_X + 12, 96], [UTURN_X - 12, 80], [UTURN_X - 30, 80]);
+  const coneM = new THREE.MeshStandardMaterial({color:col('#f26a1b'), roughness:.6});
+  const im = new THREE.InstancedMesh(new THREE.ConeGeometry(.16, .5, 10), coneM, pts.length), o = new THREE.Object3D();
+  pts.forEach(([x, y], i) => { o.position.set(X(x), .27, Z(y)); o.updateMatrix(); im.setMatrixAt(i, o.matrix); });
+  im.castShadow = true; scene.add(im);
+}
+// starter with the gun at KM 0, on the plaza edge beside the START arch
+const starter = makePerson();
+{
+  starter.position.set(X(905), 0, Z(106));
+  starter.rotation.y = Math.atan2(X(840) - X(905), Z(88) - Z(106));
+  const arm = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, .55, 6), new THREE.MeshStandardMaterial({color:col('#e0b08a')}));
+  arm.position.set(.2, 1.35, 0); starter.add(arm);
+  const gun = new THREE.Mesh(new THREE.BoxGeometry(.06, .12, .16), new THREE.MeshStandardMaterial({color:col('#15161c')}));
+  gun.position.set(.2, 1.68, .04); starter.add(gun);
+  scene.add(starter);
+}
+const GUN_AT = new V3(X(905), 1.85, Z(106));
+const fx = [];
+function gunFx(){
+  const flash = new THREE.Mesh(new THREE.SphereGeometry(.25, 10, 8), new THREE.MeshBasicMaterial({color:col('#ffe27a'), transparent:true}));
+  flash.position.copy(GUN_AT); scene.add(flash); fx.push({m:flash, t:0, life:.35, flash:true});
+  for (let i = 0; i < 7; i++){
+    const s = new THREE.Mesh(new THREE.SphereGeometry(.18, 8, 6), new THREE.MeshBasicMaterial({color:col('#d9dbe2'), transparent:true, opacity:.8, depthWrite:false}));
+    s.position.copy(GUN_AT); scene.add(s);
+    fx.push({m:s, t:0, life:2.2 + Math.random(), v:new V3((Math.random() - .5) * .6, .7 + Math.random() * .5, (Math.random() - .5) * .6)});
+  }
+}
+function updateFx(dt){
+  for (let i = fx.length - 1; i >= 0; i--){
+    const f = fx[i]; f.t += dt; const k = f.t / f.life;
+    if (k >= 1){ scene.remove(f.m); f.m.geometry.dispose(); f.m.material.dispose(); fx.splice(i, 1); continue; }
+    if (f.flash){ f.m.scale.setScalar(1 + k * 4); f.m.material.opacity = 1 - k; }
+    else { f.m.position.addScaledVector(f.v, dt); f.m.scale.setScalar(1 + k * 5); f.m.material.opacity = .8 * (1 - k); }
+  }
 }
 function parkAt(c, slot){
   const u = c.userData;
   Object.assign(u, {state:'parked', park:slot});
   c.position.set(X(slot[0]), 0, Z(slot[1]));
   c.rotation.y = 0;                       // facing east, toward the BYD Test Drive
+  mounted(c, false);                      // rider has stepped off and walked into the village
   c.visible = true; parked.push(c);
 }
 function freePark(){
-  const used = new Set(riders.filter(c => c.userData.state === 'parked' || c.userData.state === 'ride').map(c => c.userData.park));
+  const used = new Set(riders.filter(c => ['parked', 'finish'].includes(c.userData.state)).map(c => c.userData.park));
   let s = PARK.find(p => !used.has(p));
-  if (!s){ const old = parked.shift(); if (!old) return PARK[Math.random() * PARK.length | 0]; s = old.userData.park; old.userData.state = 'idle'; old.visible = false; }
+  if (!s){
+    const old = parked.shift(); if (!old) return null;
+    s = old.userData.park; old.userData.state = 'idle'; old.visible = false;
+  }
   return s;
 }
 const riders = [];
 for (let i = 0; i < 72; i++){ const c = makeCyclist(); c.visible = false; c.userData.state = 'idle'; scene.add(c); riders.push(c); }
-for (let i = 0; i < 15; i++) parkAt(riders[i], PARK[i]);
-let waveNo = 0, finished = 0, waveTimer = 0;
-const WAVE_EVERY = 24;
+for (let i = 0; i < 8; i++) parkAt(riders[i], PARK[i]);
+let waveNo = 0, waveTimer = 0, gunT = -1, finished = 0;
+// simPhase: 'auto' (free-running), 'morning' (pre-race walkthrough drives the waves), 'after' (no bikes on the start side)
+let simPhase = 'auto', gunCue = false, gunAge = -1, gunNow = false;
 function fillStandby(){
-  let n = 0;
+  if (simPhase === 'after') return;
+  let n = riders.filter(c => c.userData.state === 'wait').length;
   for (const c of riders){
     if (n >= SLOTS.length) break;
     if (c.userData.state !== 'idle') continue;
     const s = SLOTS[n++];
-    Object.assign(c.userData, {state:'wait', slot:s, route:null, d:0, delay:0, counted:false});
+    Object.assign(c.userData, {state:'wait', slot:s, route:null, d:0, delay:0, park:null, walking:false});
     c.position.set(X(s[0]) + (Math.random() - .5) * .6, 0, Z(s[1]) + (Math.random() - .5) * .6);
-    c.rotation.y = 0; c.visible = true;
+    c.rotation.y = 0; mounted(c, true); c.visible = true;
   }
 }
 function releaseWave(){
   waveNo++;
-  // the wave already at the start has gone off; make room for the new one
-  riders.forEach(c => { if (c.userData.state === 'start'){ c.userData.state = 'idle'; c.visible = false; } });
   let k = 0;
-  riders.forEach(c => { if (c.userData.state === 'wait'){ const u = c.userData; u.grid = GRID[k % GRID.length]; u.state = 'ride'; u.route = rideRoute(u.slot, u.grid); u.d = 0; u.delay = k++ * .55; u.v = 7 + Math.random() * 1.5; u.lane = 0; } });
+  riders.forEach(c => { if (c.userData.state === 'wait'){ const u = c.userData; u.gi = k; u.grid = GRID[k % GRID.length]; u.state = 'ride'; u.route = rideRoute(u.slot, u.grid); u.d = 0; u.delay = k++ * .55; u.v = 6 + Math.random() * 1.2; } });
   toast(`Wave ${waveNo} heading to the start`);
   setTimeout(fillStandby, 4000);
 }
+function gunStart(){
+  riders.forEach(c => { const u = c.userData; if (u.state !== 'grid') return;
+    Object.assign(u, {state:'race', route:raceRoute(u.grid), d:0, delay:(u.gi >> 1) * .7, v:7 + Math.random() * 1.5}); });
+  gunFx(); gunAge = 0;
+  toast(`Gun start at KM 0 · Wave ${waveNo}`);
+}
+// finishers: appear on Independence Road (west end), ride east, cross FINISH, park, then walk into the village
+const FIN_EVERY = 3.4;
+let finT = 1.5;
+// cross FINISH, leave the road at once through the Entrance, then ride up beside the Bike Rack to a free slot
+function finRoute(slot, x0){
+  return mkPath([[x0 || 110, 963], [800, 963], [830, 958], [950, 940], [990, 914], [1008, 880], [1000, 850], [1000, 795], [945, 795], [945, slot[1]], slot]);
+}
+function sendFinisher(x0, delay){
+  const c = riders.find(r => r.userData.state === 'idle');
+  const slot = c && freePark();
+  if (!c || !slot) return null;
+  const route = finRoute(slot, x0);
+  Object.assign(c.userData, {state:'finish', inWave:false, park:slot, route, d:0, delay:delay || 0, v:6 + Math.random() * 1.5, walking:false, walkAt:route.L[2] + 2.5});
+  c.position.set(X(x0 || 110), 0, Z(963)); c.rotation.y = 0;
+  mounted(c, true); c.visible = !(delay > 0);
+  return c;
+}
+// people on foot: finishers leave their bike at the rack and walk the village (route A east blocks, route B west blocks), out by the Exit
+const TAIL_A = [[796,443],[796,742],[858,742],[858,830],[645,830],[645,870],[622,884],[608,905],[600,965]];
+const TAIL_B = [[688,443],[688,587],[572,587],[572,812],[590,830],[645,830],[645,870],[622,884],[608,905],[600,965]];
+const finWalkers = [];
+for (let i = 0; i < 14; i++){ const p = makePerson(); p.visible = false; p.userData.busy = false; scene.add(p); finWalkers.push(p); }
+function walkIn(slot){
+  const p = finWalkers.find(w => !w.userData.busy); if (!p) return;
+  const head = [[slot[0] - 6, slot[1]], [945, slot[1]]];
+  const pts = head.concat([[945, 443]], Math.random() < .5 ? TAIL_A : TAIL_B);
+  Object.assign(p.userData, {busy:true, r:mkPath(pts), d:0, v:1.1 + Math.random() * .4, off:(Math.random() - .5) * .8, ph:Math.random() * 6});
+  p.visible = true;
+}
+// Phase 1, morning (pre-race): Entrance -> Registration -> Kit Claiming -> Baggage -> east lane north -> Bike Check -> Standby per Wave,
+// then Exit to Start -> Ramp -> KM 0 plaza -> behind the grid at the START arch -> gun start
+const anyRider = (...st) => riders.some(c => st.includes(c.userData.state));
+const MORNING = [
+  {t:'Arrive at the Entrance', d:'Morning call time. Riders walk in from Independence Road through the main Entrance at the southeast corner and follow the red lane north along the operations column. Sponsor and merchant booths are still closed.',
+   pts:[[1075,915],[1022,890],[1008,880],[1000,850],[1000,795],[945,795]], look:null},
+  {t:'Step 1 · Registration', d:'First stop: Registration. Present your QR code or ID at either of the two Registration desks (10 × 10 ft each) and get your race bib.',
+   pts:[[945,795],[945,589]], look:[890,589]},
+  {t:'Step 2 · Kit Claiming', d:'Next, step back down to Kit Claiming (10 × 30 ft) and claim your race kit: jersey, bib number and freebies.',
+   pts:[[945,589],[945,686]], look:[890,686]},
+  {t:'Step 3 · Baggage', d:'Drop your bag at the Baggage Area (10 × 30 ft) at the top of the operations column. Keep your claim stub.',
+   pts:[[945,686],[945,496]], look:[890,496]},
+  {t:'Step 4 · Bike check', d:'Follow the eastern red lane straight north to the top lane, then west along it and up to the Bike Check Station, keeping clear of the sponsor blocks, photowalls and stage. Marshals check brakes, tyres and helmet.',
+   pts:[[945,496],[945,443],[688,443],[688,318]], look:[642,315]},
+  {t:'Step 5 · Standby per Wave', d:'Riders wait here by wave, on their bikes and ready to go. When the wave is called it rides out through the Exit to Start lane.',
+   pts:[[688,318],[688,285],[648,285]], look:[560,252],
+   enter(){ if (!anyRider('wait', 'ride', 'grid')) fillStandby(); }},
+  {t:'Step 6 · Exit to Start and the Ramp', d:'The wave is called. Follow it out of Standby, north along the Exit to Start lane and straight up the green Ramp onto the KM 0 plaza.',
+   pts:[[648,285],[665,280],[676,266],[676,118]], startDelay:7, gun:1,
+   enter(){ if (anyRider('wait') && !anyRider('ride', 'grid')) releaseWave(); }},
+  {t:'Step 7 · KM 0 plaza', d:'Across the KM 0 plaza, past the Satellite Stage. The wave is lining up two abreast in the closed south lane of Roxas Boulevard, behind the START arch.',
+   pts:[[676,118],[705,140],[800,150]], look:[862,121], gun:1},
+  {t:'Step 8 · Gun start', d:'Stand behind the grid on Roxas Boulevard. When everyone is lined up the starter fires the gun and the wave rolls through the START arch, U-turns at the cones and heads west to Katigbak Parkway. Press Gun start to fire it now.',
+   pts:[[800,150],[765,128],[724,110]], look:[900,84], gun:1, pause:3,
+   arrive(){ if (!anyRider('ride', 'grid')){ if (!anyRider('wait')) fillStandby(); releaseWave(); } gunCue = true; },
+   hold(){ return !(gunAge > 8); }}
+];
+MORNING.forEach(s => s.path = mkPath(s.pts));
+const MORNING_FLOW = MORNING.slice(0, 6);   // the on-foot part, Entrance to Standby per Wave
+const MORNING_ALL = mkPath(MORNING_FLOW.reduce((a, s, i) => a.concat(i ? s.pts.slice(1) : s.pts), []));
+const MORNING_STOPS = [];   // where people on foot pause, and what they face
+{ let L = 0; MORNING_FLOW.forEach((s, i) => { L += s.path.len; if (s.look && i < MORNING_FLOW.length - 1) MORNING_STOPS.push({d:L, look:s.look}); }); }
+function resetMorning(){
+  // pre-race: nothing on the roads, no finishers yet, a full wave staged in Standby
+  gunT = -1; gunCue = false; gunAge = -1; waveTimer = 0;
+  riders.forEach(c => { if (c.userData.state !== 'idle' && c.userData.state !== 'wait'){ c.userData.state = 'idle'; c.visible = false; } });
+  parked.length = 0;
+  finWalkers.forEach(w => { w.userData.busy = false; w.visible = false; });
+  fillStandby();
+}
+MORNING.reset = resetMorning;
+
+// Phase 2, after the race: a wave crosses FINISH and clears off the road to the Bike Rack, then the Bike Village tour
+function resetAfter(){
+  // after the race: no bikes on Roxas, Exit to Start or Standby per Wave
+  gunT = -1; gunCue = false; gunAge = -1;
+  riders.forEach(c => { if (['wait', 'ride', 'grid', 'race'].includes(c.userData.state)){ c.userData.state = 'idle'; c.visible = false; } });
+}
+const ATOUR = [
+  {t:'You cross the FINISH', d:'You ride the last metres along Independence Road behind your wave and cross under the FINISH arch.',
+   pts:[[330,963],[800,963],[830,958],[855,954]], speed:6.5, eye:1.6, pause:.6, you:'ride',
+   enter(){
+     // the rest of your wave rides ahead of you at the same pace, so nobody runs into you
+     [780, 660, 540].forEach(x0 => { const c = sendFinisher(x0, 0); if (c) c.userData.v = 6.5; });
+   }},
+  {t:'Walk your bike to the Bike Rack', d:'Just past the arch you get off and walk your bike, like everyone ahead of you: in through the Entrance, up the east red lane to the Bike Rack, and rack it. Independence Road stays clear except for the BYD Test Drive Lane.',
+   pts:[[855,954],[950,940],[990,914],[1008,880],[1000,850],[1000,795],[945,795],[945,MY_SLOT[1]]], speed:1.5, look:MY_SLOT, pause:3.5, you:'walkbike'},
+  {t:'Bikes and Coffee', d:'North along the rack to Bikes and Coffee in the northeast corner. Grab a coffee after the ride.',
+   pts:[[945,MY_SLOT[1]],[945,443],[975,443]], look:[1002,421]},
+  {t:'Photowalls: 21 KM, 10 KM, 5 KM', d:'Along the top lane are the three photowalls, one for each distance. Find yours and take the finisher photo.',
+   pts:[[975,443],[945,443],[760,443]], look:[790,405]},
+  {t:'Neutra K and Wert PH', d:'Into the north sponsor blocks. Facing the fronts of Wert PH, with Neutra K behind it in the northeast block.',
+   pts:[[760,443],[796,443],[796,587],[832,587]], look:[832,524]},
+  {t:'Oxecure and Dr. O', d:'Oxecure and Dr. O share one 15 × 10 ft tent, with the Dr. O photo wall beside it.',
+   pts:[[832,587],[730,587]], look:[728,523]},
+  {t:'DOT Booth', d:'The Department of Tourism booth (10 × 20 ft) with its photo wall, in the northwest block.',
+   pts:[[730,587],[618,587]], look:[618,528]},
+  {t:'BDO and Specialign', d:'Round to the front of the south sponsor block: the BDO and Specialign branded tents, each with a photo wall.',
+   pts:[[618,587],[688,587],[688,682],[735,682]], look:[735,640]},
+  {t:'Fitbar, Cargo Boss and Espace Wellness', d:'Down the east lane of the south blocks: Fitbar, Cargo Boss and the Espace Wellness stall.',
+   pts:[[735,682],[796,682],[796,742],[838,742]], look:[838,700]},
+  {t:'Popcycle, Gatorade and Pepsi', d:'Popcycle, and Gatorade and Pepsi sharing one tent. Cold drinks after the ride.',
+   pts:[[838,742],[796,742],[796,765],[745,765]], look:[745,718]},
+  {t:'BYD Showroom', d:'The BYD Showroom: a 10 × 15 m truss tent with the Shark 6 on a turf deck.',
+   pts:[[745,765],[700,765]], look:[630,720]},
+  {t:'Merchants', d:'Through the two rows of merchant booths: food, drinks and bike gear.',
+   pts:[[700,765],[796,765],[796,742],[858,742],[858,830],[650,830]], look:[640,795]},
+  {t:'Main Stage', d:'End at the Main Stage on the west side of the village for the awards and the show. Enjoy the Bike Village!',
+   pts:[[650,830],[590,830],[572,812],[572,600]], look:[497,580], pause:8}
+];
+ATOUR.forEach(s => s.path = mkPath(s.pts));
+ATOUR.reset = resetAfter;
+const morningWalkers = [];
+for (let i = 0; i < 12; i++){
+  const p = makePerson();
+  p.userData = {d:Math.random() * MORNING_ALL.len, v:1.0 + Math.random() * .4, off:-(.7 + Math.random() * .5),   // keep right, clear of the walkthrough camera
+     ph:Math.random() * 6, wait:0, next:0};
+  p.userData.next = MORNING_STOPS.findIndex(s => s.d > p.userData.d);
+  scene.add(p); morningWalkers.push(p);
+}
+// morning: sponsor, DOT and merchant booths are still closed (shutters down), shown only in the morning walkthrough
+const closedBooths = new THREE.Group(); closedBooths.visible = false; scene.add(closedBooths);
+{
+  const shut = new THREE.MeshStandardMaterial({color:col('#dfe3ec'), roughness:.8});
+  ITEMS.forEach(it => {
+    if (!['sponsor', 'merch', 'dot'].includes(it.cat) || !it.tent) return;
+    const w = it.w / S + .04, d = it.h / S + .04, h = it.tent === 'stall' ? 2.25 : 2.3;
+    const [bx, bz] = BACKDIR[it.back || 'n'];
+    const mats = [shut, shut, shut, shut, shut, shut];
+    mats[bx < 0 ? 0 : bx > 0 ? 1 : bz < 0 ? 4 : 5] = faceMat('CLOSED', bx !== 0 ? d : w, h, '#dfe3ec', '#c8202f');
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mats);
+    m.position.set(X(it.x), h / 2, Z(it.y)); if (it.rot) m.rotation.y = it.rot * Math.PI / 180;
+    m.castShadow = m.receiveShadow = true; closedBooths.add(m);
+  });
+}
+// smooth turning: frame-rate independent easing and shortest-way angle blend
+const ease = (k, dt) => 1 - Math.exp(-k * dt);
+let camYaw = 0, camPitch = 0, camSnap = true;   // first-person camera heading state
+function lerpAngle(a, b, t){ const d = ((b - a + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI; return a + d * t; }
 fillStandby();
 
 /* ---------- selection ring ---------- */
@@ -1848,18 +2131,41 @@ function goStop(i){
   select(null);
   flyTo(stopView(s));
 }
-function setPlaying(p){ playing = p; $('play').textContent = p ? 'Pause tour' : 'Play tour'; }
-$('prev').onclick = () => goStop(stop - 1);
-$('next').onclick = () => goStop(stop + 1);
+function setPlaying(p){ playing = p; $('play').textContent = p ? 'Pause' : 'Play'; }
+const stepMode = () => !!wtMode();
+$('prev').onclick = () => stepMode() ? goStep(mStep - 1) : goStop(stop - 1);
+$('next').onclick = () => stepMode() ? goStep(mStep + 1) : goStop(stop + 1);
+$('gunBtn').onclick = () => { gunCue = true; gunNow = true; if (!anyRider('ride', 'grid')){ if (!anyRider('wait')) fillStandby(); releaseWave(); } };
 $('play').onclick = () => { setPlaying(!playing); if (playing) dwell = 0; };
 
+let silentFly = false;
 function setMode(m, silent){
   mode = m;
-  ['mTour','mWalk','mFree','mTop'].forEach(id => $(id).setAttribute('aria-pressed', 'false'));
-  $({tour:'mTour', walk:'mWalk', free:'mFree', top:'mTop'}[m]).setAttribute('aria-pressed', 'true');
-  controls.enabled = m !== 'walk';
-  const tourUI = m === 'tour';
-  bar.ctrls.hidden = !tourUI; bar.progWrap.hidden = !tourUI;
+  ['mTour','mWalkthrough','mFree','mTop'].forEach(id => $(id).setAttribute('aria-pressed', 'false'));
+  $({tour:'mTour', morning:'mWalkthrough', walk:'mWalkthrough', free:'mFree', top:'mTop'}[m]).setAttribute('aria-pressed', 'true');
+  const wm = wtMode();
+  $('phaseSw').hidden = !(wm || m === 'top');
+  $('phLive').hidden = m !== 'top';
+  $('phLive').setAttribute('aria-pressed', m === 'top' && !wm);
+  $('phMorning').setAttribute('aria-pressed', wm === 'morning'); $('phAfter').setAttribute('aria-pressed', wm === 'walk');
+  if (m === 'morning' || m === 'walk') lastPhase = m;
+  controls.enabled = !firstPerson();
+  canvas.classList.toggle('fp', firstPerson());
+  const prevPhase = simPhase;
+  simPhase = wm === 'morning' ? 'morning' : wm === 'walk' ? 'after' : 'auto';
+  if (!wm){ guide.visible = guideRing.visible = myBike.visible = false; }
+  if (simPhase === 'auto' && prevPhase !== 'auto'){ gunCue = false; if (!anyRider('wait', 'ride', 'grid', 'race')) fillStandby(); }
+  // walkthroughs keep the crowd light so the view stays clear; after the race nobody heads to Standby
+  morningWalkers.forEach((w, i) => w.visible = wm === 'morning' ? i < 5 : wm !== 'walk');
+  walkers.forEach((w, i) => w.visible = wm === 'morning' ? i % 4 === 0 : wm === 'walk' ? (w.userData.r === ROUTES[2] && i % 2 === 0) : true);
+  if (wm !== 'morning') $('gunBtn').hidden = true;
+  closedBooths.visible = wm === 'morning';
+  boothPeople.forEach(m => m.visible = wm !== 'morning' || MORNING_STAFFED.has(m.userData.base));
+  flowLanes.forEach(l => l.visible = wm !== 'morning');      // morning: no queue lanes inside the booth area,
+  morningLane.forEach(l => l.visible = wm === 'morning');   // just the one lane toward KM 0
+  camSnap = true;
+  const tourUI = m === 'tour' || !!wm;
+  bar.ctrls.hidden = !tourUI; bar.progWrap.hidden = !tourUI; dotsEl.hidden = m !== 'tour';
   if (silent) return;
   focusIds = [];
   if (m === 'tour'){ setPlaying(!reduced); goStop(stop); }
@@ -1869,26 +2175,64 @@ function setMode(m, silent){
     bar.text.textContent = 'Drag to orbit, right-drag or two fingers to pan, scroll or pinch to zoom. Tap any booth to see what it is, or pick one from the booth list.';
   }
   if (m === 'top'){
-    bar.kick.textContent = 'Top view'; bar.count.textContent = '';
-    bar.title.textContent = 'The site map in 3D';
-    bar.text.textContent = 'Same layout as the printed site map: Roxas Boulevard at the top, Independence Road at the bottom. Drag to tilt back into 3D.';
-    flyTo({pos:new V3(0, innerWidth < 820 ? 200 : 132, .1), tgt:new V3(0, 0, 0)}, 2);
+    if (!silentFly) flyTo({pos:new V3(0, innerWidth < 820 ? 200 : 132, .1), tgt:new V3(0, 0, 0)}, 2);
+    if (wm){ select(null); setPlaying(!reduced); goStep(0); }
+    else {
+      bar.kick.textContent = 'Top view'; bar.count.textContent = 'Live';
+      bar.title.textContent = 'The site map in 3D';
+      bar.text.textContent = 'Same layout as the printed site map: Roxas Boulevard at the top, Independence Road at the bottom. Pick Morning or After the race to watch that walkthrough from above. Drag to tilt back into 3D.';
+    }
   }
-  if (m === 'walk'){
-    walkD = 0; select(null);
-    bar.kick.textContent = 'Walk the lanes'; bar.count.textContent = '';
-    bar.title.textContent = 'Entering from Independence Road';
-    bar.text.textContent = 'You are walking the red rider-flow lanes at eye level, from the Entrance through the booths to the Exit.';
+  if (m === 'walk' || m === 'morning'){
+    fly = null; select(null); setPlaying(!reduced);
+    goStep(0);
   }
 }
+// one Walkthrough button; the bar switches between the Morning (pre-race) and After the race phases
+let lastPhase = 'morning';
+$('mWalkthrough').onclick = () => setMode(lastPhase);
+// in Top view the switch picks Live / Morning / After the race without moving the camera
+function setTopPhase(ph){ topPhase = ph; silentFly = true; setMode('top'); silentFly = false; }
+$('phLive').onclick = () => setTopPhase(null);
+$('phMorning').onclick = () => { if (mode === 'top') setTopPhase('morning'); else if (mode !== 'morning') setMode('morning'); };
+$('phAfter').onclick = () => { if (mode === 'top') setTopPhase('after'); else if (mode !== 'walk') setMode('walk'); };
+// ⋯ menu: simulation on/off and hide panels
+const moreMenu = $('moreMenu');
+function setMenu(open){
+  moreMenu.hidden = !open; $('mMore').setAttribute('aria-expanded', open);
+  if (open){ const r = $('mMore').getBoundingClientRect(); moreMenu.style.top = (r.bottom + 6) + 'px'; moreMenu.style.left = Math.max(8, Math.min(innerWidth - 186, r.right - 170)) + 'px'; }
+}
+$('mMore').onclick = e => { e.stopPropagation(); setMenu(moreMenu.hidden); };
+moreMenu.onclick = () => setMenu(false);
+document.addEventListener('pointerdown', e => { if (!moreMenu.hidden && !moreMenu.contains(e.target) && e.target !== $('mMore')) setMenu(false); });
+addEventListener('resize', () => setMenu(false));
 $('mTour').onclick = () => setMode('tour');
-$('mWalk').onclick = () => setMode('walk');
 $('mFree').onclick = () => setMode('free');
 $('mTop').onclick = () => setMode('top');
 let simOn = true;
 $('mSim').onclick = () => { simOn = !simOn; $('mSim').setAttribute('aria-pressed', simOn); $('mSim').textContent = simOn ? 'Simulation on' : 'Simulation off'; };
-$('dirToggle').onclick = () => { const o = $('dir').classList.toggle('open'); $('dirToggle').setAttribute('aria-pressed', o); };
+function setDir(o){ $('dir').classList.toggle('open', o); document.body.classList.toggle('dir-open', o); $('dirToggle').setAttribute('aria-pressed', o); }
+$('dirToggle').onclick = () => setDir(!$('dir').classList.contains('open'));
+function layoutUI(){ const r = document.querySelector('.modes').getBoundingClientRect(); document.documentElement.style.setProperty('--below-modes', Math.round(r.bottom + 10) + 'px'); }
+new ResizeObserver(layoutUI).observe(document.querySelector('.modes'));
+addEventListener('resize', layoutUI); layoutUI();
 $('infoX').onclick = () => select(null);
+// minimise buttons on every info box, and a full-view toggle that hides them all
+document.querySelectorAll('.minbtn').forEach(b => {
+  const panel = b.closest('.panel');
+  b.onclick = () => { const m = panel.classList.toggle('min'); b.textContent = m ? '+' : '−'; b.setAttribute('aria-label', m ? 'Expand' : 'Minimise'); b.setAttribute('aria-expanded', !m); };
+});
+// close the top-left box and the narration bar; Esc does the same; the Info pill brings them back
+function syncReopen(){
+  const brandClosed = $('brandBox').classList.contains('closed');
+  $('reopen').hidden = !(brandClosed || $('bar').classList.contains('closed'));
+  document.body.classList.toggle('brand-closed', brandClosed);
+  requestAnimationFrame(layoutUI);
+}
+function closePanels(){ $('brandBox').classList.add('closed'); $('bar').classList.add('closed'); syncReopen(); }
+document.querySelectorAll('.closeb').forEach(b => b.onclick = () => { b.closest('.panel').classList.add('closed'); syncReopen(); });
+$('reopen').onclick = () => { $('brandBox').classList.remove('closed'); $('bar').classList.remove('closed'); syncReopen(); };
+$('mClean').onclick = () => { const c = document.body.classList.toggle('clean'); $('mClean').setAttribute('aria-pressed', c); $('mClean').textContent = c ? 'Show panels' : 'Hide panels'; };
 
 // directory
 const listEl = $('list');
@@ -1904,7 +2248,7 @@ function renderDir(q){
     items.forEach(it => {
       const b = document.createElement('button'); b.textContent = it.name; b.dataset.id = it.id;
       if (it.ft || it.sz === 'To follow'){ const sm = document.createElement('small'); sm.textContent = it.szLabel ? `${it.szLabel.replace(/ /g, '')} ft` : it.ft ? `${fmtFt(it.ft[0])}×${fmtFt(it.ft[1])} ft` : 'size TBA'; b.appendChild(sm); }
-      b.onclick = () => { if (mode === 'walk' || mode === 'tour') setMode('free'); select(it); flyToItem(it); $('dir').classList.remove('open'); };
+      b.onclick = () => { if (mode !== 'free' && mode !== 'top') setMode('free'); select(it); flyToItem(it); setDir(false); };
       g.appendChild(b);
     });
     listEl.appendChild(g);
@@ -1934,21 +2278,22 @@ function pick(e){
   return hit ? hit.object.userData.item : null;
 }
 canvas.addEventListener('pointermove', e => {
-  if (e.pointerType !== 'mouse' || mode === 'walk') return;
+  if (e.pointerType !== 'mouse' || mode === 'walk' || mode === 'morning') return;
   hoverIt = pick(e); canvas.classList.toggle('hovering', !!hoverIt);
 });
-canvas.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; if (mode === 'tour') setPlaying(false); fly = null; });
+canvas.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; if (mode === 'tour') setPlaying(false); if (mode !== 'morning') fly = null; });
 canvas.addEventListener('pointerup', e => {
-  if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6 || mode === 'walk') return;
+  if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6 || mode === 'walk' || mode === 'morning') return;
   const it = pick(e);
   if (it){ select(it); flyToItem(it); } else select(null);
 });
 canvas.addEventListener('wheel', () => { fly = null; if (mode === 'tour') setPlaying(false); }, {passive:true});
 addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
-  if (e.key === 'ArrowRight') goStop(stop + 1);
-  if (e.key === 'ArrowLeft') goStop(stop - 1);
-  if (e.key === 'Escape') select(null);
+  if (e.key === 'ArrowRight') $('next').click();
+  if (e.key === 'ArrowLeft') $('prev').click();
+  if (e.key === 'h' || e.key === 'H') $('mClean').click();
+  if (e.key === 'Escape'){ if (!moreMenu.hidden) setMenu(false); else if (selected) select(null); else closePanels(); }
 });
 
 /* ---------- floating name tags ---------- */
@@ -1959,7 +2304,6 @@ function updateTags(){
   const show = new Set(focusIds);
   if (selected) show.add(selected.id);
   if (hoverIt) show.add(hoverIt.id);
-  if (mode === 'walk' && nearIt) show.add(nearIt.id);
   const r = canvas.getBoundingClientRect();
   for (const id in tagPool) if (!show.has(id)) tagPool[id].style.display = 'none';
   show.forEach(id => {
@@ -1972,15 +2316,114 @@ function updateTags(){
   });
 }
 
-/* ---------- walk mode ---------- */
-const WALK = mkPath([[1075,915],[1022,890],[1000,850],[1000,795],[945,795],[945,600],[945,450],[870,450],[700,450],[688,460],[688,587],[580,587],[572,600],[572,765],[590,830],[645,830],[645,880],[617,905],[600,975]]);
-let walkD = 0, nearIt = null;
-const wp = new V3(), wl = new V3(), wlook = new V3(0, 1.6, 0);
-function nearestBooth(p){
-  let best = null, bd = 7.5;
-  ITEMS.forEach(it => { if (it.cat === 'landmark' && it.kind !== 'gate') return; const d = Math.hypot(X(it.x) - p.x, Z(it.y) - p.z) - Math.max(it.w, it.h) / S * .3; if (d < bd){ bd = d; best = it; } });
+/* ---------- walkthroughs (eye level, step by step) ---------- */
+// mode 'morning' runs MORNING (phase 1), mode 'walk' runs ATOUR (phase 2, after the race)
+let mStep = 0, mD = 0, mPause = 0, mWait = 0, mArrived = false;
+const M_PAUSE = 5;
+let topPhase = null;   // Top view: null = live sim, 'morning' or 'after' = watch that walkthrough from above
+const wtMode = () => mode === 'morning' || (mode === 'top' && topPhase === 'morning') ? 'morning'
+  : mode === 'walk' || (mode === 'top' && topPhase === 'after') ? 'walk' : null;
+const firstPerson = () => mode === 'morning' || mode === 'walk';
+const WT = () => wtMode() === 'walk' ? ATOUR : MORNING;
+// "you": a highlighted walker (Top view), and your own bike for the after-the-race phase
+const guide = makePerson(); guide.scale.setScalar(1.25); guide.visible = false; scene.add(guide);
+const guideRing = new THREE.Mesh(new THREE.RingGeometry(1.1, 1.5, 40), new THREE.MeshBasicMaterial({color:col('#ffc928'), transparent:true, opacity:.95, depthWrite:false}));
+guideRing.rotation.x = -Math.PI / 2; guideRing.position.y = .08; guideRing.renderOrder = 3; guideRing.visible = false; scene.add(guideRing);
+const myBike = makeCyclist(); myBike.visible = false; scene.add(myBike);
+const youP = new V3(), youR = new V3();
+function updateYou(dt, t, s, wm){
+  const top = mode === 'top', after = wm === 'walk';
+  const k = ease(9, dt);
+  // where "you" are: the camera in first person, the step position from above
+  if (top) youP.copy(wp); else youP.set(camera.position.x, 0, camera.position.z);
+  youR.set(-dv.z, 0, dv.x);   // your right-hand side
+  const heading = Math.atan2(-dv.z, dv.x);
+  myBike.visible = after;
+  if (after){
+    if (s.you === 'ride'){
+      myBike.position.copy(youP).addScaledVector(dv, top ? 0 : .25);
+      myBike.rotation.y = lerpAngle(myBike.rotation.y, heading, k);
+      mounted(myBike, top);   // first person: you are the rider, so only the bike shows
+      myBike.userData.wheels.forEach(wh => wh.rotation.z -= (s.speed || 1.8) * dt / .32);
+    } else if (s.you === 'walkbike' && !mArrived){
+      myBike.position.copy(youP).addScaledVector(youR, -.55).addScaledVector(dv, top ? 0 : .3);   // bike on your left
+      myBike.rotation.y = lerpAngle(myBike.rotation.y, heading, k);
+      mounted(myBike, top ? 'walk' : false);
+      if (mD < s.path.len) myBike.userData.wheels.forEach(wh => wh.rotation.z -= (s.speed || 1.8) * dt / .32);
+    } else {
+      // racked: slide it into your slot, then it stays there for the village tour
+      mounted(myBike, false);
+      myBike.position.lerp(tmp.set(X(MY_SLOT[0]), 0, Z(MY_SLOT[1])), s.you === 'walkbike' ? ease(2.5, dt) : 1);
+      myBike.rotation.y = lerpAngle(myBike.rotation.y, 0, s.you === 'walkbike' ? ease(4, dt) : 1);
+    }
+  }
+  // the highlighted walker, only in Top view and only when you are not on / beside the bike
+  const onBike = after && (s.you === 'ride' || (s.you === 'walkbike' && !mArrived));
+  guide.visible = top && !onBike;
+  guideRing.visible = top;
+  guideRing.position.x = youP.x; guideRing.position.z = youP.z;
+  guideRing.material.opacity = .7 + Math.sin(t * 4) * .25;
+  if (guide.visible){
+    guide.position.set(youP.x, mD < s.path.len ? Math.abs(Math.sin(t * 7)) * .06 : 0, youP.z);
+    const want = s.look && mD >= s.path.len ? Math.atan2(X(s.look[0]) - youP.x, Z(s.look[1]) - youP.z) : Math.atan2(dv.x, dv.z);
+    guide.rotation.y = lerpAngle(guide.rotation.y, want, k);
+  }
+}
+function goStep(i){
+  const steps = WT(), n = (i + steps.length) % steps.length;
+  const snap = camSnap || n === 0 || n !== mStep + 1;
+  mStep = n; mD = 0; mPause = 0; mWait = 0; mArrived = false;
+  if (n === 0) steps.reset();
+  const s = steps[n];
+  if (s.enter) s.enter();
+  const wm = wtMode();
+  bar.kick.textContent = (mode === 'top' ? 'Top view · ' : '') + (wm === 'walk' ? 'After the race' : 'Morning walkthrough'); bar.count.textContent = `Step ${n + 1} of ${steps.length}`;
+  bar.title.textContent = s.t; bar.text.textContent = s.d;
+  focusIds = [];   // the bar already names the booth
+  $('gunBtn').hidden = !(wm === 'morning' && s.gun);
+  if (snap && firstPerson()){ s.path.at(0, wp, dv); camera.position.copy(wp.setY(1.7)); camYaw = Math.atan2(dv.x, dv.z); camPitch = -.05; camSnap = false; lookYaw = lookPitch = 0; }
+}
+// first-person camera: heading and pitch ease toward a target, never pointing at the ground under the camera
+function fpLook(tx, ty, tz, dt, rate){
+  const dx = tx - camera.position.x, dz = tz - camera.position.z, dist = Math.hypot(dx, dz);
+  if (dist > 1.5){   // too close to the target: hold the current heading instead of spinning or looking down
+    const k = ease(rate, dt);
+    camYaw = lerpAngle(camYaw, Math.atan2(dx, dz), k);
+    camPitch += (Math.max(-.3, Math.min(.15, Math.atan2(ty - camera.position.y, Math.max(dist, 3)))) - camPitch) * k;
+  }
+  // your own look-around (drag) sits on top of the guided heading; it drifts back a few seconds after you let go
+  if (!lookDrag){ lookIdle += dt; if (lookIdle > LOOK_HOLD){ const kb = ease(1.5, dt); lookYaw -= lookYaw * kb; lookPitch -= lookPitch * kb; } }
+  const yaw = camYaw + lookYaw, pitch = Math.max(-1.2, Math.min(1.2, camPitch + lookPitch)), c = Math.cos(pitch);
+  camera.lookAt(camera.position.x + Math.sin(yaw) * c, camera.position.y + Math.sin(pitch), camera.position.z + Math.cos(yaw) * c);
+}
+// drag to look around while the walkthrough keeps moving
+const FOV_WALK = 75, FOV_ORBIT = 42, LOOK_HOLD = 3;
+let lookYaw = 0, lookPitch = 0, lookDrag = null, lookIdle = 0;
+canvas.addEventListener('pointerdown', e => {
+  if (!firstPerson()) return;
+  lookDrag = {x:e.clientX, y:e.clientY, id:e.pointerId}; lookIdle = 0;
+  canvas.setPointerCapture(e.pointerId); canvas.classList.add('looking');
+});
+canvas.addEventListener('pointermove', e => {
+  if (!lookDrag || e.pointerId !== lookDrag.id) return;
+  const k = camera.fov * Math.PI / 180 / canvas.clientHeight;   // one pixel of drag = one pixel of view
+  lookYaw += (e.clientX - lookDrag.x) * k; lookPitch += (e.clientY - lookDrag.y) * k;
+  lookPitch = Math.max(-1.1, Math.min(1.1, lookPitch));
+  lookDrag.x = e.clientX; lookDrag.y = e.clientY;
+});
+const endLook = e => { if (lookDrag && e.pointerId === lookDrag.id){ lookDrag = null; lookIdle = 0; canvas.classList.remove('looking'); } };
+canvas.addEventListener('pointerup', endLook); canvas.addEventListener('pointercancel', endLook);
+function nearestId(p){
+  let best = null, bd = 1e9;
+  ITEMS.forEach(it => { const d = Math.hypot(it.x - p[0], it.y - p[1]); if (d < bd){ bd = d; best = it.id; } });
   return best;
 }
+const wp = new V3(), wl = new V3();
+
+
+
+
+
 
 /* ---------- resize ---------- */
 function resize(){
@@ -1997,28 +2440,72 @@ function frame(){
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
 
   if (simOn){
+    const turnK = ease(7, dt);
+    const face = (o, yaw, snap) => { o.rotation.y = snap ? yaw : lerpAngle(o.rotation.y, yaw, turnK); };
     // walkers
     walkers.forEach(w => {
       const u = w.userData; u.d += u.v * dt;
-      if (u.d > u.r.len){ u.d = 0; }
+      let snap = false;
+      if (u.d > u.r.len){ u.d = 0; snap = true; }
       u.r.at(u.d, pv, dv);
       w.position.set(pv.x - dv.z * u.off, Math.abs(Math.sin(t * 7 + u.ph)) * .06, pv.z + dv.x * u.off);
-      w.rotation.y = Math.atan2(dv.x, dv.z);
+      if (dv.lengthSq() > 1e-6) face(w, Math.atan2(dv.x, dv.z), snap);
     });
-    // waves
-    waveTimer += dt;
-    if (waveTimer > (waveNo === 0 ? 5 : WAVE_EVERY)){ waveTimer = 0; releaseWave(); }
+    // morning flow on foot (registration -> kit -> baggage -> bike check -> standby)
+    morningWalkers.forEach(w => {
+      const u = w.userData, st = MORNING_STOPS[u.next];
+      if (u.wait > 0){ u.wait -= dt; face(w, u.lookYaw); return; }   // turn smoothly to the booth while waiting
+      u.d += u.v * dt;
+      if (st && u.d >= st.d){ u.d = st.d; u.wait = 2 + Math.random() * 3; u.next++;
+        MORNING_ALL.at(u.d, pv, dv); w.position.set(pv.x - dv.z * u.off, 0, pv.z + dv.x * u.off);
+        u.lookYaw = Math.atan2(X(st.look[0]) - w.position.x, Z(st.look[1]) - w.position.z); return; }
+      let snap = false;
+      if (u.d > MORNING_ALL.len){ u.d = 0; u.next = 0; snap = true; }
+      MORNING_ALL.at(u.d, pv, dv);
+      w.position.set(pv.x - dv.z * u.off, Math.abs(Math.sin(t * 7 + u.ph)) * .06, pv.z + dv.x * u.off);
+      if (dv.lengthSq() > 1e-6) face(w, Math.atan2(dv.x, dv.z), snap);
+    });
+    // finishers walking from the Bike Rack into the village
+    finWalkers.forEach(w => {
+      const u = w.userData; if (!u.busy) return;
+      u.d += u.v * dt;
+      if (u.d > u.r.len){ u.busy = false; w.visible = false; return; }
+      u.r.at(u.d, pv, dv);
+      w.position.set(pv.x - dv.z * u.off, Math.abs(Math.sin(t * 7 + u.ph)) * .06, pv.z + dv.x * u.off);
+      if (dv.lengthSq() > 1e-6) face(w, Math.atan2(dv.x, dv.z), u.d < .2);
+    });
+    // waves: standby -> grid on Roxas -> countdown -> gun start -> U-turn -> Katigbak
+    let toGrid = 0, onGrid = 0;
+    riders.forEach(c => { const s = c.userData.state; if (s === 'ride') toGrid++; else if (s === 'grid') onGrid++; });
+    if (gunT >= 0){ gunT -= dt; if (gunT < 0) gunStart(); }
+    else if (simPhase === 'auto'){
+      if (onGrid && !toGrid) gunT = 4;
+      else if (!onGrid && !toGrid){ waveTimer += dt; if (waveTimer > (waveNo === 0 ? 3 : 7)){ waveTimer = 0; releaseWave(); } }
+    } else if (simPhase === 'morning' && gunCue && onGrid && !toGrid){ gunCue = false; gunT = gunNow ? .2 : 3; gunNow = false; if (gunT > 1) toast('Gun start in 3…'); }
+    if (gunAge >= 0) gunAge += dt;
+    if (simPhase === 'auto'){ finT -= dt; if (finT <= 0){ finT = FIN_EVERY * (.7 + Math.random() * .6); sendFinisher(); } }
     riders.forEach(c => {
       const u = c.userData;
-      if (u.state !== 'ride') return;
-      if (u.delay > 0){ u.delay -= dt; return; }
-      u.d += u.v * dt;
-      if (u.d >= u.route.len){ u.state = 'start'; c.position.set(X(u.grid[0]), 0, Z(u.grid[1])); c.rotation.y = Math.PI; return; }
+      if (u.state !== 'ride' && u.state !== 'race' && u.state !== 'finish') return;
+      if (u.delay > 0){ u.delay -= dt; if (u.delay <= 0) c.visible = true; return; }
+      // finishers roll through FINISH, then get off and walk the bike to the rack
+      if (u.state === 'finish' && !u.walking && u.d > u.walkAt){ u.walking = true; mounted(c, 'walk'); }
+      const sp = u.walking ? 1.5 : u.v;
+      u.d += sp * dt;
+      if (u.walking) u.pusher.position.y = Math.abs(Math.sin(t * 7 + u.d)) * .05;
+      if (u.d >= u.route.len){
+        if (u.state === 'ride'){ u.state = 'grid'; c.position.set(X(u.grid[0]), 0, Z(u.grid[1])); c.rotation.y = 0; }
+        else if (u.state === 'race'){ u.state = 'idle'; c.visible = false; }   // cut: wave has reached Katigbak Parkway
+        else { finished++; u.inWave = false; const s = u.park; parkAt(c, s); walkIn(s); }
+        return;
+      }
       u.route.at(u.d, pv, dv);
-      c.position.set(pv.x, 0, pv.z);
-      c.rotation.y = Math.atan2(-dv.z, dv.x);
-      u.wheels.forEach(wh => wh.rotation.z -= u.v * dt / .32);
+      const onSlab = u.state === 'ride' && pv.x > X(RAMP_BOX[0]) && pv.x < X(RAMP_BOX[1]) && pv.z > Z(RAMP_BOX[2]) && pv.z < Z(RAMP_BOX[3]);
+      c.position.set(pv.x, onSlab ? SLAB_Y : 0, pv.z);
+      if (dv.lengthSq() > 1e-6) face(c, Math.atan2(-dv.z, dv.x), u.d < .3 && u.state === 'finish');
+      u.wheels.forEach(wh => wh.rotation.z -= sp * dt / .32);
     });
+    updateFx(dt);
     tdUpdate(dt);
     trees.forEach(tr => { tr.rotation.z = Math.sin(t * .8 + tr.userData.seed) * .015; });
   }
@@ -2026,22 +2513,42 @@ function frame(){
   statT += dt;
   if (statT > .5){
     statT = 0;
-    const moving = riders.filter(c => c.userData.state === 'ride').length;
-    const atStart = riders.filter(c => c.userData.state === 'start').length;
-    $('stats').textContent = waveNo ? (moving ? `Wave ${waveNo} riding to the start` : `Wave ${waveNo} at the start · ${atStart} riders`) : 'Wave 1 lining up';
+    const n = s => riders.filter(c => c.userData.state === s).length;
+    const moving = n('ride'), onGrid = n('grid'), racing = n('race');
+    $('stats').textContent = !waveNo ? 'Wave 1 lining up'
+      : moving ? `Wave ${waveNo} taking the ramp to the start`
+      : gunT >= 0 ? `Wave ${waveNo} on the grid · gun in ${Math.ceil(gunT)}`
+      : racing ? `Wave ${waveNo} off · U-turn to Katigbak`
+      : `Wave ${waveNo + 1} lining up · ${finished} finished`;
   }
 
-  // camera
-  if (mode === 'walk'){
-    walkD += 2.4 * dt;
-    if (walkD > WALK.len) walkD = 0;
-    WALK.at(walkD, wp, dv); WALK.at(walkD + 4, wl);
-    camera.position.lerp(wp.setY(1.7), walkD < .1 ? 1 : .2);
-    wlook.lerp(wl.setY(1.4), .06);
-    camera.lookAt(wlook);
-    const n = nearestBooth(camera.position);
-    if (n !== nearIt){ nearIt = n; if (n){ bar.title.textContent = 'Now passing: ' + n.name; bar.text.textContent = n.desc; } }
-  } else {
+  // camera: wide lens at eye level, normal lens for orbit / top views
+  const fovT = firstPerson() ? FOV_WALK : FOV_ORBIT;
+  if (Math.abs(camera.fov - fovT) > .05){ camera.fov += (fovT - camera.fov) * ease(5, dt); camera.updateProjectionMatrix(); }
+  const wm = wtMode();
+  if (wm){
+    const steps = WT(), s = steps[mStep], P = s.pause || M_PAUSE;
+    if (playing){
+      if (mD === 0 && s.startDelay && mWait < s.startDelay) mWait += dt;   // let the wave pull away first
+      else if (mD < s.path.len) mD = Math.min(s.path.len, mD + (s.speed || 1.8) * dt);
+      else {
+        if (!mArrived){ mArrived = true; if (s.arrive) s.arrive(); }
+        if ((mPause += dt) > P && !(s.hold && s.hold())) goStep(mStep + 1);
+      }
+    }
+    bar.prog.style.width = Math.min(100, ((mStep + Math.min(1, mD / s.path.len) * .7 + Math.min(1, mPause / P) * .3) / steps.length) * 100) + '%';
+    s.path.at(mD, wp, dv);
+    if (firstPerson()){
+      camera.position.lerp(tmp.copy(wp).setY(s.eye || 1.7), ease(8, dt));
+      // look a few metres ahead along the route; in the last stretch turn toward the booth of this step
+      const ahead = (s.speed || 1.8) > 3 ? 9 : 4;
+      if (s.look && mD > s.path.len - 2.5) wl.set(X(s.look[0]), 1.3, Z(s.look[1]));
+      else { s.path.at(mD + ahead, wl); if (mD + ahead > s.path.len) wl.addScaledVector(dv, mD + ahead - s.path.len); wl.y = 1.5; }
+      fpLook(wl.x, wl.y, wl.z, dt, 2.2);
+    }
+    wp.y = 0; updateYou(dt, t, s, wm);
+  }
+  if (!firstPerson()){
     if (fly){
       fly.t += dt / fly.dur;
       const k = fly.t >= 1 ? 1 : (fly.t < .5 ? 4 * fly.t ** 3 : 1 - (-2 * fly.t + 2) ** 3 / 2);
@@ -2058,7 +2565,7 @@ function frame(){
       }
       if (dwell > DWELL) goStop(stop + 1);
     }
-    if (!(mode === 'tour' && playing)) bar.prog.style.width = mode === 'tour' ? Math.min(100, dwell / DWELL * 100) + '%' : '0';
+    if (!(mode === 'tour' && playing) && !wm) bar.prog.style.width = mode === 'tour' ? Math.min(100, dwell / DWELL * 100) + '%' : '0';
     controls.update();
   }
 

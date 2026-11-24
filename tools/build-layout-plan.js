@@ -14,7 +14,7 @@ const OUT_PNG = path.join(ROOT, 'FunRide Bike Village - Layout Plan.png');
 
 /* ---------- read booth data from the 3D file ---------- */
 const src = fs.readFileSync(SRC, 'utf8');
-const m = src.match(/const FT = ([\d.]+);\s*const ITEMS = \[([\s\S]*?)\n\];/);
+const m = src.match(/const FT = ([\d.]+);[\s\S]*?const ITEMS = \[([\s\S]*?)\r?\n\];/);
 if (!m) throw new Error('Could not find ITEMS in ' + SRC);
 const FT = parseFloat(m[1]);
 const ITEMS = new Function('return [' + m[2] + '];')();
@@ -151,7 +151,6 @@ function features(detail) {
     s.push(`<polyline points="${bp}" fill="none" stroke="#ffffff" stroke-width="4"/><polyline points="${bp}" fill="none" stroke="#4a4e60" stroke-width="2" stroke-dasharray="4 1.5"/>`); }
   box(BY['artists-entrance'], '#5cd6df', '#1d8b94', '#132060', ['ARTISTS', 'ENTRANCE']);
   box(BY['cardinal'], '#2f5b2c', '#1c3a1a', '#fff', ['CARDINAL']);
-  box(BY['km21'], '#23219c', '#16187a', '#fff', ['21 KM']);
   // start / finish arches
   ['start', 'finish'].forEach(id => box(BY[id], '#861a1d', '#5c0f12', '#fff', [BY[id].label], { vert: true }));
   // restricted
